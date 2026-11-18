@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1620" id="tc">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Tampons de paillasse</title>
+<meta name="apple-mobile-web-app-title" content="Tampons">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="alternate icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%AA%3C/text%3E%3C/svg%3E">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+if (window.tailwind) tailwind.config = {
+  theme: { extend: {
+    colors: {
+      bg: 'rgb(var(--bg) / <alpha-value>)',
+      surface: 'rgb(var(--surface) / <alpha-value>)',
+      raised: 'rgb(var(--raised) / <alpha-value>)',
+      line: 'rgb(var(--line) / <alpha-value>)',
+      ink: 'rgb(var(--ink) / <alpha-value>)',
+      muted: 'rgb(var(--muted) / <alpha-value>)',
+      accent: 'rgb(var(--accent) / <alpha-value>)',
+      onaccent: 'rgb(var(--onaccent) / <alpha-value>)',
+      solid: 'rgb(var(--solid) / <alpha-value>)',
+      d2o: 'rgb(var(--d2o) / <alpha-value>)',
+      warn: 'rgb(var(--warn) / <alpha-value>)',
+      err: 'rgb(var(--err) / <alpha-value>)'
+    }
+  }}
+};
+</script>
+<style>
+  :root {
+    --bg: 15 22 32; --surface: 22 31 44; --raised: 31 42 58; --line: 46 60 80;
+    --ink: 226 234 243; --muted: 136 152 173; --accent: 125 211 232; --onaccent: 8 34 44;
+    --solid: 232 182 90; --d2o: 165 180 252; --warn: 240 190 90; --err: 248 125 125;
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    --bg: 240 243 247; --surface: 255 255 255; --raised: 233 238 244; --line: 210 218 228;
+    --ink: 16 26 38; --muted: 88 102 122; --accent: 8 128 160; --onaccent: 255 255 255;
+    --solid: 170 112 10; --d2o: 70 82 200; --warn: 165 105 0; --err: 196 40 40;
+    color-scheme: light;
+  }
+  html, body { background: rgb(var(--bg)); color: rgb(var(--ink)); }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+         -webkit-tap-highlight-color: transparent; -webkit-font-smoothing: antialiased; }
+  .num { font-variant-numeric: tabular-nums; }
+  input, select, textarea { font-size: 16px; }
+  .no-sb { scrollbar-width: none; } .no-sb::-webkit-scrollbar { display: none; }
+  button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<style type="text/tailwindcss">
+  @layer components {
+    .card { @apply bg-surface border border-line rounded-2xl p-4; }
+    .h2 { @apply text-sm font-semibold text-muted; }
+    .lbl { @apply block text-[13px] font-medium text-muted mb-1.5; }
+    .inp { @apply w-full h-12 px-3 rounded-xl bg-raised border border-line text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/25 placeholder:text-muted/60; }
+    .sel { @apply h-12 px-2 rounded-xl bg-raised border border-line text-ink outline-none focus:border-accent; }
+    .btn { @apply h-12 px-4 rounded-xl font-semibold inline-flex items-center justify-center gap-2 transition select-none active:scale-[0.98]; }
+    .btn-p { @apply bg-accent text-onaccent; }
+    .btn-g { @apply bg-raised text-ink border border-line; }
+    .btn-d { @apply bg-err/10 text-err border border-err/30; }
+    .chip { @apply h-10 min-w-[2.6rem] px-2.5 shrink-0 rounded-full text-sm font-semibold border border-line bg-raised text-muted inline-flex items-center justify-center transition active:scale-95; }
+    .chip.on { @apply bg-accent/15 border-accent text-accent; }
+    .fchip { @apply shrink-0 px-3 py-1.5 rounded-xl border border-line bg-raised text-muted flex flex-col items-center leading-tight text-sm font-semibold transition active:scale-95; }
+    .fchip.on { @apply border-solid bg-solid/15 text-solid; }
+    .iconbtn { @apply w-10 h-10 shrink-0 rounded-xl inline-flex items-center justify-center text-muted active:bg-raised; }
+    .tag { @apply text-[11px] font-semibold px-1.5 py-0.5 rounded-md shrink-0; }
+    .seg { @apply flex h-12 p-1 gap-1 rounded-xl bg-raised border border-line; }
+    .seg > button { @apply px-3 rounded-lg text-sm font-semibold text-muted transition; }
+    .seg > button.on { @apply bg-accent text-onaccent; }
+    .warn { @apply mt-3 text-[13px] text-warn bg-warn/10 border border-warn/25 rounded-xl px-3 py-2; }
+  }
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="sticky top-0 z-30 bg-bg/90 backdrop-blur border-b border-line/60" style="padding-top:env(safe-area-inset-top)">
+  <div class="max-w-xl mx-auto px-4 h-14 flex items-center justify-between">
+    <div class="flex items-center gap-3 min-w-0">
+      <div id="logo" class="w-9 h-9 rounded-xl bg-accent/15 text-accent flex items-center justify-center shrink-0"></div>
+      <div class="min-w-0">
+        <div id="ttl" class="font-semibold leading-tight truncate">Tampon</div>
+        <div class="text-xs text-muted leading-tight">Tampons de paillasse</div>
+      </div>
+    </div>
+    <button data-a="settings" class="iconbtn" aria-label="Réglages et sauvegarde" id="gear"></button>
+  </div>
+</header>
+
+<main id="view" class="max-w-xl mx-auto px-4 pt-4 pb-32 space-y-4"></main>
+
+<nav class="fixed bottom-0 inset-x-0 z-30 bg-surface/95 backdrop-blur border-t border-line" style="padding-bottom:env(safe-area-inset-bottom)">
+  <div id="nav" class="max-w-xl mx-auto grid grid-cols-4"></div>
+</nav>
+
+<div id="sheet" class="fixed inset-0 z-50 hidden">
+  <div id="backdrop" data-a="closeSheet" class="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-200"></div>
+  <div id="panel" class="absolute bottom-0 inset-x-0 max-w-xl mx-auto bg-surface border-t border-line rounded-t-3xl max-h-[90vh] overflow-y-auto translate-y-full transition-transform duration-200" style="padding-bottom:calc(env(safe-area-inset-bottom) + 1.25rem)">
+    <div class="sticky top-0 bg-surface pt-2.5 pb-3 flex justify-center z-10"><div class="w-10 h-1.5 rounded-full bg-line"></div></div>
+    <div id="sheetBody" class="px-4 space-y-4"></div>
+  </div>
+</div>
+
+<div id="toast" class="fixed inset-x-0 mx-auto w-fit max-w-[90%] z-[60] px-4 py-2.5 rounded-xl bg-ink text-bg text-sm font-medium shadow-lg opacity-0 pointer-events-none transition-opacity duration-200" style="bottom:calc(env(safe-area-inset-bottom) + 5.5rem)"></div>
+
+<script>
+'use strict';
+/* ============ Utilitaires ============ */
+const $ = (s, r = document) => r.querySelector(s);
+const uid = () => Math.random().toString(36).slice(2, 9);
+const clone = o => JSON.parse(JSON.stringify(o));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const num = v => { if (typeof v === 'number') return v; const n = parseFloat(String(v ?? '').replace(/\s/g, '').replace(',', '.')); return isFinite(n) ? n : NaN; };
+const dv = v => (typeof v === 'number') ? (isFinite(v) ? String(v).replace('.', ',') : '') : (v ?? '');
+const _nf = {};
+const fmt = (x, d = 3) => { if (Math.abs(x) < 1e-12) x = 0; return (_nf[d] || (_nf[d] = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: d }))).format(x); };
+const fmtC = x => isFinite(x) ? fmt(+(+x).toPrecision(4), 12) : '—';
+const fmtMW = x => isFinite(x) ? fmt(+x, 2) : '—';
+const fmtPct = x => isFinite(x) ? fmt(+(+x).toPrecision(3), 4) : '—';
+function fmtVol(ml) {
+  const a = Math.abs(ml);
+  if (a >= 1000) return fmt(ml / 1000, 3) + ' L';
+  if (a >= 1) return fmt(ml, a >= 100 ? 1 : a >= 10 ? 2 : 3) + ' mL';
+  const ul = ml * 1000, b = Math.abs(ul);
+  return fmt(ul, b >= 10 ? 1 : b >= 1 ? 2 : 3) + ' µL';
+}
+function fmtMass(g) {
+  if (Math.abs(g) >= 1) return fmt(g, 4) + ' g';
+  const mg = g * 1000;
+  if (Math.abs(mg) >= 1) return fmt(mg, Math.abs(mg) >= 100 ? 1 : 2) + ' mg';
+  return fmt(g * 1e6, 1) + ' µg';
+}
+const SUBS = '₀₁₂₃₄₅₆₇₈₉';
+const subscript = s => String(s || '').replace(/([A-Za-z\)\]])(\d+)/g, (m, a, d) => a + [...d].map(c => SUBS[c]).join(''));
+const norm = s => String(s || '').toLowerCase().replace(/[₀-₉]/g, c => SUBS.indexOf(c)).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+/* ============ Unités ============ */
+// mol : base M ; mass : base mg/mL (= g/L) ; vv : % v/v ; x : facteur ; pct : % générique (C1V1)
+const CU = {
+  'M': { f: 'mol', k: 1 }, 'mM': { f: 'mol', k: 1e-3 }, 'µM': { f: 'mol', k: 1e-6 }, 'nM': { f: 'mol', k: 1e-9 },
+  'mg/mL': { f: 'mass', k: 1 }, 'µg/mL': { f: 'mass', k: 1e-3 }, '% p/v': { f: 'mass', k: 10 },
+  '% v/v': { f: 'vv', k: 1 }, 'X': { f: 'x', k: 1 }, '%': { f: 'pct', k: 1 }
+};
+const UNIT_LIST = ['M', 'mM', 'µM', 'nM', 'mg/mL', 'µg/mL', '% p/v', '% v/v', 'X'];
+const SOLID_UNITS = ['M', 'mM', 'µM', 'mg/mL', '% p/v'];
+const C1_UNITS = ['M', 'mM', 'µM', 'nM', 'mg/mL', 'µg/mL', '%', 'X'];
+const VU = { 'µL': 1e-3, 'mL': 1, 'L': 1000 };
+function conv(v, from, to, mw) {
+  const a = CU[from], b = CU[to];
+  if (!a || !b || !isFinite(v)) return null;
+  if (a.f === b.f) return v * a.k / b.k;
+  if (mw > 0) {
+    if (a.f === 'mol' && b.f === 'mass') return v * a.k * mw / b.k;   // M × g/mol = g/L = mg/mL
+    if (a.f === 'mass' && b.f === 'mol') return v * a.k / mw / b.k;
+  }
+  return null;
+}
+
+/* ============ Données par défaut ============ */
+const DEF_REAGENTS = [
+  { id: 'r_na2hpo4', name: 'Phosphate disodique', formula: 'Na₂HPO₄', forms: [{ l: 'Anhydre', mw: 141.96 }, { l: '·2H₂O', mw: 177.99 }, { l: '·7H₂O', mw: 268.07 }, { l: '·12H₂O', mw: 358.14 }], sel: 0 },
+  { id: 'r_nah2po4', name: 'Phosphate monosodique', formula: 'NaH₂PO₄', forms: [{ l: 'Anhydre', mw: 119.98 }, { l: '·H₂O', mw: 137.99 }, { l: '·2H₂O', mw: 156.01 }], sel: 0 },
+  { id: 'r_k2hpo4', name: 'Phosphate dipotassique', formula: 'K₂HPO₄', forms: [{ l: 'Anhydre', mw: 174.18 }, { l: '·3H₂O', mw: 228.22 }], sel: 0 },
+  { id: 'r_kh2po4', name: 'Phosphate monopotassique', formula: 'KH₂PO₄', forms: [{ l: 'Anhydre', mw: 136.09 }], sel: 0 },
+  { id: 'r_nan3', name: 'Azoture de sodium', formula: 'NaN₃', forms: [{ l: 'Anhydre', mw: 65.01 }], sel: 0 },
+  { id: 'r_dss', name: 'DSS (référence RMN)', formula: 'C₆H₁₅NaO₃SSi', forms: [{ l: 'Standard', mw: 218.32 }, { l: 'd₆', mw: 224.36 }], sel: 0 },
+  { id: 'r_tsp', name: 'TSP (référence RMN)', formula: 'C₆H₉D₄NaO₂Si', forms: [{ l: 'd₄', mw: 172.27 }], sel: 0 },
+  { id: 'r_nacl', name: 'Chlorure de sodium', formula: 'NaCl', forms: [{ l: 'Anhydre', mw: 58.44 }], sel: 0 },
+  { id: 'r_kcl', name: 'Chlorure de potassium', formula: 'KCl', forms: [{ l: 'Anhydre', mw: 74.55 }], sel: 0 },
+  { id: 'r_mgcl2', name: 'Chlorure de magnésium', formula: 'MgCl₂', forms: [{ l: 'Anhydre', mw: 95.21 }, { l: '·6H₂O', mw: 203.30 }], sel: 1 },
+  { id: 'r_cacl2', name: 'Chlorure de calcium', formula: 'CaCl₂', forms: [{ l: 'Anhydre', mw: 110.98 }, { l: '·2H₂O', mw: 147.01 }], sel: 1 },
+  { id: 'r_tris', name: 'Tris', formula: 'C₄H₁₁NO₃', forms: [{ l: 'Base', mw: 121.14 }, { l: '·HCl', mw: 157.60 }], sel: 0 },
+  { id: 'r_hepes', name: 'HEPES', formula: 'C₈H₁₈N₂O₄S', forms: [{ l: 'Acide', mw: 238.30 }, { l: 'Sel Na', mw: 260.29 }], sel: 0 },
+  { id: 'r_edta', name: 'EDTA disodique', formula: 'Na₂H₂EDTA', forms: [{ l: 'Anhydre', mw: 336.21 }, { l: '·2H₂O', mw: 372.24 }], sel: 1 },
+  { id: 'r_dtt', name: 'DTT', formula: 'C₄H₁₀O₂S₂', forms: [{ l: 'Anhydre', mw: 154.25 }], sel: 0 },
+  { id: 'r_tcep', name: 'TCEP·HCl', formula: 'C₉H₁₅O₆P·HCl', forms: [{ l: 'Anhydre', mw: 286.65 }], sel: 0 },
+  { id: 'r_d2o', name: 'Oxyde de deutérium', formula: 'D₂O', forms: [{ l: '99,9 % D', mw: 20.03 }], sel: 0, solvent: true, density: 1.107 }
+];
+const DEF_STOCKS = [
+  { id: 's_napi', name: 'Phosphate de sodium pH 6,8', c: 1, u: 'M', solv: 'H2O', mw: '' },
+  { id: 's_nan3', name: 'NaN₃', c: 2, u: '% p/v', solv: 'H2O', mw: 65.01 },
+  { id: 's_dss', name: 'DSS', c: 50, u: 'mM', solv: 'D2O', mw: 218.32 },
+  { id: 's_nacl', name: 'NaCl', c: 5, u: 'M', solv: 'H2O', mw: 58.44 }
+];
+const DEF_RECIPE = {
+  id: 'rc_rmn', name: 'Tampon RMN 5X Phosphate/NaN₃/DSS 50 % D₂O', vol: 10, vu: 'mL', x: 5, d2o: 50,
+  comps: [
+    { kind: 'stock', ref: 's_napi', c: 20, u: 'mM' },
+    { kind: 'stock', ref: 's_nan3', c: 0.02, u: '% p/v' },
+    { kind: 'stock', ref: 's_dss', c: 0.1, u: 'mM' }
+  ]
+};
+const emptyDraft = () => ({ name: '', vol: 10, vu: 'mL', x: 1, d2o: 10, comps: [] });
+const defFlash = () => ({ c1: '', u1: 'mM', v1: '', vu1: 'µL', c2: '', u2: 'mM', v2: '', vu2: 'mL', mRef: 'r_na2hpo4', mForm: 0, mMw: '', mC: '', mU: 'M', mV: '', mVU: 'mL' });
+const recipeToDraft = r => ({ name: r.name, vol: r.vol, vu: r.vu, x: r.x, d2o: r.d2o, comps: r.comps.map(c => ({ ...c, uid: uid() })) });
+function defaults() {
+  return {
+    v: 1, theme: 'dark', tab: 'buf',
+    reagents: clone(DEF_REAGENTS), stocks: clone(DEF_STOCKS), recipes: [clone(DEF_RECIPE)],
+    draft: recipeToDraft(DEF_RECIPE), flash: defFlash(),
+    phos: { c: '50', ph: '7,0', pka: '6,82', cat: 'Na' }
+  };
+}
+
+/* ============ État & stockage ============ */
+const KEY = 'tampons-paillasse.v1';
+let S = null, storageOK = true;
+try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) { storageOK = false; }
+if (!S || !Array.isArray(S.reagents)) S = defaults();
+S.flash = Object.assign(defFlash(), S.flash || {});
+S.phos = Object.assign({ c: '50', ph: '7,0', pka: '6,82', cat: 'Na' }, S.phos || {});
+S.draft = S.draft && Array.isArray(S.draft.comps) ? S.draft : emptyDraft();
+S.draft.comps.forEach(c => { if (!c.uid) c.uid = uid(); });
+S.stocks = S.stocks || []; S.recipes = S.recipes || [];
+if (!['buf', 'stk', 'rec', 'flash'].includes(S.tab)) S.tab = 'buf';
+
+let saveT = null;
+function flush() {
+  clearTimeout(saveT);
+  try { localStorage.setItem(KEY, JSON.stringify(S)); storageOK = true; }
+  catch (e) { if (storageOK) toast('Sauvegarde locale impossible sur ce navigateur'); storageOK = false; }
+}
+const persist = () => { clearTimeout(saveT); saveT = setTimeout(flush, 200); };
+document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
+window.addEventListener('pagehide', flush);
+
+const ui = { stk: 'stocks' };
+const ticks = new Set();
+let edit = null, sheetFn = null, pending = null;
+
+const R = id => S.reagents.find(r => r.id === id);
+const ST = id => S.stocks.find(s => s.id === id);
+const comp = u => S.draft.comps.find(c => c.uid === u);
+function rForm(r, i) {
+  if (!r) return '(réactif supprimé)';
+  const f = r.forms[i] || r.forms[0]; const l = f?.l || '';
+  if (l.startsWith('·')) return r.formula + l;
+  if (r.forms.length === 1) return r.formula;
+  return r.formula + ' ' + l.toLowerCase();
+}
+const compName = c => c.kind === 'stock' ? (ST(c.ref)?.name || '(mère supprimée)') : rForm(R(c.ref), c.form);
+
+/* ============ Icônes ============ */
+const sv = d => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ICON = {
+  beaker: sv('<path d="M9 3h6M10 3v6.5L4.6 18.4A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.4-2.6L14 9.5V3"/><path d="M7.4 14.5h9.2"/>'),
+  rack: sv('<path d="M7 3v12.5a2 2 0 0 0 4 0V3M15 3v12.5a2 2 0 0 0 4 0V3M5 3h8M13 3h8M7 10h4M15 8h4"/>'),
+  book: sv('<path d="M6 3h12v18l-6-4-6 4z"/>'),
+  bolt: sv('<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/>'),
+  gear: sv('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>'),
+  plus: sv('<path d="M12 5v14M5 12h14"/>'),
+  x: sv('<path d="M6 6l12 12M18 6 6 18"/>'),
+  copy: sv('<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>'),
+  trash: sv('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13M9 7V4h6v3"/>'),
+  edit: sv('<path d="M4 20h4L19 9l-4-4L4 16v4z"/>'),
+  chev: sv('<path d="m9 6 6 6-6 6"/>')
+};
+
+/* ============ Calcul du tampon ============ */
+const KB = {
+  solid: ['Peser', 'text-solid bg-solid/10', 'text-solid'],
+  stock: ['Pipeter', 'text-accent bg-accent/10', 'text-accent'],
+  d2o: ['Ajouter', 'text-d2o bg-d2o/10', 'text-d2o'],
+  h2o: ['Compléter', 'text-muted bg-raised', 'text-ink']
+};
+function compute(d) {
+  const out = { steps: [], warns: [] };
+  const Vf = num(d.vol) * (VU[d.vu] || 1);
+  if (!(Vf > 0)) { out.fatal = 'Indiquez le volume final.'; return out; }
+  const fx = num(d.x) > 0 ? num(d.x) : 1;
+  const P = isFinite(num(d.d2o)) ? Math.min(Math.max(num(d.d2o), 0), 100) : 0;
+  let sumV = 0, d2oIn = 0, hasSolid = false;
+  const solids = [], liquids = [];
+  for (const c of d.comps) {
+    const tgt = num(c.c), ce = tgt * fx;
+    if (c.kind === 'stock') {
+      const s = ST(c.ref);
+      if (!s) { liquids.push({ key: c.uid, k: 'stock', title: 'Solution mère supprimée', err: 'Retirez ce composant ou recréez la mère.' }); continue; }
+      const base = { key: c.uid, k: 'stock', title: s.name };
+      if (!(tgt >= 0)) { liquids.push({ ...base, err: 'Saisissez la concentration finale.' }); continue; }
+      const cs = conv(num(s.c), s.u, c.u, num(s.mw));
+      if (cs == null) { liquids.push({ ...base, err: `Unités incompatibles (${s.u} → ${c.u}). Ajoutez la masse molaire à la mère.` }); continue; }
+      if (!(cs > 0)) { liquids.push({ ...base, err: 'Concentration de la mère invalide.' }); continue; }
+      const v = ce * Vf / cs;
+      if (v > Vf + 1e-9) { liquids.push({ ...base, err: `Mère trop diluée : il faudrait ${fmtVol(v)} pour ${fmtVol(Vf)}.` }); sumV += v; continue; }
+      sumV += v; if (s.solv === 'D2O') d2oIn += v;
+      liquids.push({ ...base, amt: fmtVol(v), sub: `${fmtC(ce)} ${c.u} final, mère à ${fmtC(num(s.c))} ${s.u}${s.solv === 'D2O' ? ' dans D₂O' : ''}` });
+      if (v > 0 && v < 0.0005) out.warns.push(`${s.name} : ${fmtVol(v)} est trop faible pour être pipeté. Faites une dilution intermédiaire de la mère.`);
+    } else {
+      const r = R(c.ref);
+      if (!r) { solids.push({ key: c.uid, k: 'solid', title: 'Réactif supprimé', err: 'Retirez ce composant.' }); continue; }
+      const f = r.forms[c.form] || r.forms[0]; const mw = num(f?.mw);
+      const base = { key: c.uid, k: 'solid', title: rForm(r, c.form) };
+      if (!(tgt >= 0)) { solids.push({ ...base, err: 'Saisissez la concentration finale.' }); continue; }
+      const u = CU[c.u]; let g;
+      if (u?.f === 'mol') {
+        if (!(mw > 0)) { solids.push({ ...base, err: 'Masse molaire manquante.' }); continue; }
+        g = ce * u.k * mw * Vf / 1000;
+      } else if (u?.f === 'mass') g = ce * u.k * Vf / 1000;
+      else { solids.push({ ...base, err: 'Unité non valable pour un solide.' }); continue; }
+      hasSolid = true;
+      solids.push({ ...base, amt: fmtMass(g), sub: `${r.name}, ${fmtMW(mw)} g/mol, ${fmtC(ce)} ${c.u} final` });
+      if (g > 0 && g < 0.001) out.warns.push(`${r.formula} : ${fmtMass(g)} à peser, c’est en dessous de la précision d’une balance de paillasse. Préparez plutôt une solution mère.`);
+    }
+  }
+  out.steps = [...solids, ...liquids];
+  const d2oTot = P / 100 * Vf;
+  let d2oAdd = d2oTot - d2oIn;
+  if (d2oAdd < -1e-9) { out.warns.push(`Les mères dans D₂O apportent déjà ${fmtPct(d2oIn / Vf * 100)} % de D₂O, plus que les ${fmtPct(P)} % demandés.`); d2oAdd = 0; }
+  if (d2oAdd > 1e-12) {
+    const rho = num(S.reagents.find(r => r.solvent)?.density) || 1.107;
+    out.steps.push({ key: 'd2o', k: 'd2o', title: 'D₂O', amt: fmtVol(d2oAdd), sub: `${fmtPct(P)} % v/v au total, soit environ ${fmtMass(d2oAdd * rho)}` });
+  }
+  const h2o = Vf - sumV - Math.max(d2oAdd, 0);
+  if (h2o < -1e-9) out.steps.push({ key: 'h2o', k: 'h2o', title: 'H₂O', err: `Impossible : les volumes dépassent le volume final de ${fmtVol(-h2o)}.` });
+  else out.steps.push({ key: 'h2o', k: 'h2o', title: hasSolid ? 'H₂O jusqu’au trait de jauge' : 'H₂O', amt: (hasSolid ? '≈ ' : '') + fmtVol(Math.max(h2o, 0)), sub: hasSolid ? `Complétez à ${fmtVol(Vf)} exactement, les solides occupent un peu de volume` : `Volume final ${fmtVol(Vf)}` });
+  if (fx > 1 && P > 0) out.after = `Une fois dilué ${fmtC(fx)} fois dans H₂O, l’échantillon contiendra ${fmtPct(P / fx)} % de D₂O.`;
+  return out;
+}
+
+/* ============ Vues ============ */
+const TABS = [['buf', 'Tampon', 'beaker'], ['stk', 'Stocks', 'rack'], ['rec', 'Recettes', 'book'], ['flash', 'Flash', 'bolt']];
+const TITLES = { buf: 'Générateur de tampon', stk: 'Mères et réactifs', rec: 'Mes recettes', flash: 'Calculs flash' };
+
+function render() {
+  $('#ttl').textContent = TITLES[S.tab];
+  $('#nav').innerHTML = TABS.map(([k, l, i]) => `<button data-a="tab" data-t="${k}" class="h-16 flex flex-col items-center justify-center gap-1 text-xs font-medium transition ${S.tab === k ? 'text-accent' : 'text-muted'}" aria-current="${S.tab === k}">${ICON[i]}<span>${l}</span></button>`).join('');
+  $('#view').innerHTML = ({ buf: viewBuf, stk: viewStk, rec: viewRec, flash: viewFlash })[S.tab]();
+  if (S.tab === 'buf') renderResults();
+  if (S.tab === 'flash') { renderC1(); renderMass(); }
+}
+
+/* ---- Générateur ---- */
+const chip = (k, v, label) => `<button data-a="setDraft" data-k="${k}" data-v="${v}" class="chip ${num(S.draft[k]) === v ? 'on' : ''}">${label}</button>`;
+function viewBuf() {
+  const d = S.draft;
+  return `
+  <section class="card space-y-4">
+    <div class="flex items-center justify-between gap-3">
+      <div class="min-w-0"><h2 class="h2">Paramètres</h2>${d.name ? `<div class="text-[15px] font-semibold truncate mt-0.5">${esc(d.name)}</div>` : ''}</div>
+      <button data-a="newDraft" class="text-sm font-semibold text-muted px-3 py-2 -mr-2 rounded-lg active:bg-raised">Nouveau</button>
+    </div>
+    <div>
+      <span class="lbl">Volume final</span>
+      <div class="flex gap-2">
+        <input class="inp flex-1 min-w-0 num text-lg font-semibold" inputmode="decimal" enterkeyhint="done" data-in="draft.vol" value="${esc(dv(d.vol))}" aria-label="Volume final">
+        <div class="seg shrink-0">${['µL', 'mL', 'L'].map(u => `<button data-a="setDraft" data-k="vu" data-v="${u}" class="${d.vu === u ? 'on' : ''}">${u}</button>`).join('')}</div>
+      </div>
+    </div>
+    <div>
+      <span class="lbl">Facteur de concentration</span>
+      <div class="flex gap-2 items-center">
+        <div class="relative w-24 shrink-0"><input class="inp num font-semibold pr-7" inputmode="decimal" enterkeyhint="done" data-in="draft.x" value="${esc(dv(d.x))}" aria-label="Facteur"><span class="absolute right-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">X</span></div>
+        <div class="flex gap-1.5 overflow-x-auto no-sb">${[1, 2, 5, 10, 20].map(v => chip('x', v, v + 'X')).join('')}</div>
+      </div>
+    </div>
+    <div>
+      <span class="lbl">D₂O (% v/v)</span>
+      <div class="flex gap-2 items-center">
+        <div class="relative w-24 shrink-0"><input class="inp num font-semibold pr-7" inputmode="decimal" enterkeyhint="done" data-in="draft.d2o" value="${esc(dv(d.d2o))}" aria-label="Pourcentage de D2O"><span class="absolute right-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">%</span></div>
+        <div class="flex gap-1.5 overflow-x-auto no-sb">${[0, 5, 10, 50, 100].map(v => chip('d2o', v, v)).join('')}</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="h2">Composants${num(d.x) > 1 ? ` <span class="font-normal">(concentrations à 1X)</span>` : ''}</h2>
+      <button data-a="phos" class="text-sm font-semibold text-accent px-3 py-2 -mr-2 rounded-lg active:bg-raised">Phosphate à pH…</button>
+    </div>
+    <div class="space-y-3">${d.comps.map(compHTML).join('') || `<p class="text-sm text-muted py-2">Ajoutez vos solutions mères ou réactifs solides pour obtenir le protocole.</p>`}</div>
+    <button data-a="addSheet" class="btn btn-g w-full mt-3 border-dashed">${ICON.plus} Ajouter un composant</button>
+  </section>
+
+  <section class="card" id="results"></section>
+
+  <div class="grid grid-cols-2 gap-2">
+    <button data-a="copyProto" class="btn btn-g">${ICON.copy} Copier</button>
+    <button data-a="saveSheet" class="btn btn-p">${ICON.book} Enregistrer</button>
+  </div>`;
+}
+function unitOpts(c) {
+  if (c.kind === 'stock') {
+    const s = ST(c.ref); if (!s) return [c.u];
+    const f = CU[s.u]?.f, hasMw = num(s.mw) > 0;
+    return UNIT_LIST.filter(u => CU[u].f === f || (hasMw && ((f === 'mol' && CU[u].f === 'mass') || (f === 'mass' && CU[u].f === 'mol'))));
+  }
+  return SOLID_UNITS;
+}
+function compHTML(c) {
+  let name, meta, extra = '';
+  if (c.kind === 'stock') {
+    const s = ST(c.ref);
+    name = s ? s.name : 'Solution mère supprimée';
+    meta = `<span class="tag ${KB.stock[1]}">Mère</span>${s ? `<span class="num">${fmtC(num(s.c))} ${esc(s.u)} dans ${s.solv === 'D2O' ? 'D₂O' : 'H₂O'}</span>` : ''}`;
+  } else {
+    const r = R(c.ref);
+    name = r ? r.name : 'Réactif supprimé';
+    const f = r?.forms[c.form] || r?.forms[0];
+    meta = `<span class="tag ${KB.solid[1]}">Solide</span>${r ? `<span>${esc(rForm(r, c.form))}</span><span class="num">${fmtMW(num(f?.mw))} g/mol</span>` : ''}`;
+    if (r && r.forms.length > 1) extra = `<div class="flex gap-2 overflow-x-auto no-sb mt-3">${r.forms.map((f, i) => `<button data-a="setForm" data-uid="${c.uid}" data-i="${i}" class="fchip ${i === (c.form || 0) ? 'on' : ''}"><span>${esc(f.l)}</span><span class="text-[11px] font-normal opacity-80 num">${fmtMW(num(f.mw))}</span></button>`).join('')}</div>`;
+  }
+  return `<div class="rounded-xl border border-line bg-raised/40 p-3">
+    <div class="flex items-start gap-2">
+      <div class="flex-1 min-w-0">
+        <div class="font-semibold truncate">${esc(name)}</div>
+        <div class="text-xs text-muted mt-1 flex items-center gap-x-2 gap-y-1 flex-wrap">${meta}</div>
+      </div>
+      <button data-a="rmComp" data-uid="${c.uid}" class="iconbtn -mr-1 -mt-1" aria-label="Retirer ${esc(name)}">${ICON.x}</button>
+    </div>
+    ${extra}
+    <div class="flex gap-2 mt-3">
+      <input class="inp flex-1 min-w-0 num font-semibold" inputmode="decimal" enterkeyhint="done" placeholder="Concentration finale" data-cin="c" data-uid="${c.uid}" value="${esc(dv(c.c))}" aria-label="Concentration finale">
+      <select class="sel w-28 shrink-0" data-cin="u" data-uid="${c.uid}" aria-label="Unité">${unitOpts(c).map(u => `<option value="${u}" ${u === c.u ? 'selected' : ''}>${u}</option>`).join('')}</select>
+    </div>
+    <div class="text-xs text-accent mt-1.5 num empty:hidden" data-eff="${c.uid}"></div>
+  </div>`;
+}
+function stepHTML(s, i) {
+  const done = ticks.has(s.key); const [lab, cls, amtCls] = KB[s.k];
+  return `<li><button data-a="tick" data-k="${s.key}" class="w-full flex items-center gap-3 p-3 rounded-xl border text-left transition ${s.err ? 'border-err/40 bg-err/5' : 'border-line bg-raised/50'} ${done ? 'opacity-45' : ''}">
+    <span class="w-7 h-7 shrink-0 rounded-full border-2 inline-flex items-center justify-center text-xs font-bold ${done ? 'bg-accent border-accent text-onaccent' : 'border-line text-muted'}">${done ? '✓' : i + 1}</span>
+    <span class="flex-1 min-w-0">
+      <span class="flex items-center gap-1.5 min-w-0"><span class="tag ${cls}">${lab}</span><span class="font-semibold truncate ${done ? 'line-through' : ''}">${esc(s.title)}</span></span>
+      <span class="block text-xs mt-1 ${s.err ? 'text-err' : 'text-muted'}">${esc(s.err || s.sub || '')}</span>
+    </span>
+    ${s.amt ? `<span class="text-xl font-bold num shrink-0 ${amtCls}">${s.amt}</span>` : ''}
+  </button></li>`;
+}
+function renderResults() {
+  const el = $('#results'); if (!el) return;
+  const d = S.draft, fx = num(d.x) > 0 ? num(d.x) : 1;
+  d.comps.forEach(c => {
+    const e = document.querySelector(`[data-eff="${c.uid}"]`); if (!e) return;
+    const t = num(c.c);
+    e.textContent = (isFinite(t) && fx !== 1) ? `Soit ${fmtC(t * fx)} ${c.u} dans ce tampon ${fmtC(fx)}X` : '';
+  });
+  const o = compute(d);
+  if (o.fatal) { el.innerHTML = `<h2 class="h2 mb-2">Protocole</h2><p class="text-sm text-muted">${o.fatal}</p>`; return; }
+  el.innerHTML = `
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="h2">Protocole <span class="font-normal">pour ${fmtVol(num(d.vol) * VU[d.vu])}</span></h2>
+      ${ticks.size ? `<button data-a="untick" class="text-sm font-semibold text-muted px-3 py-1.5 -mr-2 rounded-lg active:bg-raised">Tout décocher</button>` : `<span class="text-xs text-muted">Touchez une étape pour la cocher</span>`}
+    </div>
+    <ol class="space-y-2">${o.steps.map(stepHTML).join('')}</ol>
+    ${o.warns.map(w => `<p class="warn">${esc(w)}</p>`).join('')}
+    ${o.after ? `<p class="text-xs text-muted mt-3">${o.after}</p>` : ''}`;
+}
+function syncChips() {
+  document.querySelectorAll('[data-a="setDraft"]').forEach(b => {
+    if (b.dataset.k === 'vu') return;
+    b.classList.toggle('on', num(S.draft[b.dataset.k]) === +b.dataset.v);
+  });
+}
+
+/* ---- Stocks ---- */
+function viewStk() {
+  const t = ui.stk;
+  const seg = `<div class="seg w-full">
+    <button data-a="stkTab" data-v="stocks" class="flex-1 ${t === 'stocks' ? 'on' : ''}">Solutions mères <span class="opacity-60 num">${S.stocks.length}</span></button>
+    <button data-a="stkTab" data-v="reagents" class="flex-1 ${t === 'reagents' ? 'on' : ''}">Réactifs <span class="opacity-60 num">${S.reagents.length}</span></button>
+  </div>`;
+  const search = `<input class="inp" placeholder="Rechercher" data-search autocomplete="off" enterkeyhint="search" aria-label="Rechercher">`;
+  if (t === 'stocks') {
+    const list = S.stocks.map(s => `<button data-a="editStock" data-id="${s.id}" data-name="${esc(norm(s.name))}" class="srch w-full card p-3 flex items-center gap-3 text-left active:bg-raised">
+      <span class="w-11 h-11 rounded-xl ${s.solv === 'D2O' ? 'bg-d2o/15 text-d2o' : 'bg-accent/15 text-accent'} flex items-center justify-center text-xs font-bold shrink-0">${s.solv === 'D2O' ? 'D₂O' : 'H₂O'}</span>
+      <span class="flex-1 min-w-0"><span class="block font-semibold truncate">${esc(s.name)}</span><span class="block text-sm text-muted num">${fmtC(num(s.c))} ${esc(s.u)}${num(s.mw) > 0 ? `, ${fmtMW(num(s.mw))} g/mol` : ''}</span></span>
+      <span class="text-muted">${ICON.chev}</span></button>`).join('');
+    return seg + search + `<div class="space-y-2">${list || `<p class="text-sm text-muted text-center py-6">Aucune solution mère. Créez la première ci-dessous.</p>`}</div>
+      <button data-a="newStock" class="btn btn-p w-full">${ICON.plus} Nouvelle solution mère</button>`;
+  }
+  const list = S.reagents.map(r => {
+    const f = r.forms[r.sel] || r.forms[0];
+    return `<div class="srch card p-3" data-name="${esc(norm(r.name + ' ' + r.formula))}">
+      <div class="flex items-start gap-2">
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold truncate flex items-center gap-2">${esc(r.name)}${r.custom ? `<span class="tag text-accent bg-accent/10">Perso</span>` : ''}</div>
+          <div class="text-sm text-muted mt-0.5"><span>${esc(rForm(r, r.sel))}</span> <span class="text-ink font-semibold num ml-1">${fmtMW(num(f?.mw))} g/mol</span></div>
+        </div>
+        <button data-a="editReagent" data-id="${r.id}" class="iconbtn -mr-1 -mt-1" aria-label="Modifier ${esc(r.name)}">${ICON.edit}</button>
+      </div>
+      ${r.forms.length > 1 ? `<div class="flex gap-2 overflow-x-auto no-sb mt-3">${r.forms.map((f, i) => `<button data-a="setSel" data-id="${r.id}" data-i="${i}" class="fchip ${i === r.sel ? 'on' : ''}"><span>${esc(f.l)}</span><span class="text-[11px] font-normal opacity-80 num">${fmtMW(num(f.mw))}</span></button>`).join('')}</div>` : ''}
+      ${r.solvent ? `<div class="text-xs text-muted mt-2">Solvant, densité ${fmtC(num(r.density))} g/mL. Sert au calcul de la masse de D₂O.</div>` : ''}
+    </div>`;
+  }).join('');
+  return seg + search + `<div class="space-y-2">${list}</div>
+    <button data-a="newReagent" class="btn btn-p w-full">${ICON.plus} Molécule personnalisée</button>`;
+}
+
+/* ---- Recettes ---- */
+function viewRec() {
+  if (!S.recipes.length) return `<div class="card text-center py-10"><p class="font-semibold">Aucune recette enregistrée</p><p class="text-sm text-muted mt-1 mb-4">Composez un tampon puis touchez « Enregistrer ».</p><button data-a="tab" data-t="buf" class="btn btn-p">Composer un tampon</button></div>`;
+  return S.recipes.map(r => `<div class="card">
+    <div class="font-semibold leading-snug">${esc(r.name)}</div>
+    <div class="text-sm text-muted mt-1 num">${fmtC(num(r.vol))} ${esc(r.vu)}, ${fmtC(num(r.x) || 1)}X, ${fmtPct(num(r.d2o) || 0)} % D₂O</div>
+    <div class="flex flex-wrap gap-1.5 mt-3">${r.comps.map(c => `<span class="text-xs px-2 py-1 rounded-lg bg-raised border border-line">${esc(compName(c))} <span class="text-muted num">${fmtC(num(c.c))} ${esc(c.u)}</span></span>`).join('')}</div>
+    <div class="flex gap-2 mt-4">
+      <button data-a="delRec" data-id="${r.id}" class="btn btn-g w-12 px-0 shrink-0" aria-label="Supprimer la recette">${ICON.trash}</button>
+      <button data-a="loadRec" data-id="${r.id}" class="btn btn-p flex-1">Charger et calculer</button>
+    </div>
+  </div>`).join('');
+}
+
+/* ---- Flash ---- */
+function frow(label, k, ku, units) {
+  const f = S.flash;
+  return `<div><span class="lbl">${label}</span><div class="flex gap-2">
+    <input class="inp flex-1 min-w-0 num text-lg font-semibold" inputmode="decimal" enterkeyhint="done" placeholder="à calculer" data-in="flash.${k}" value="${esc(dv(f[k]))}" aria-label="${label}">
+    <select class="sel w-24 shrink-0" data-in="flash.${ku}" aria-label="Unité">${units.map(u => `<option value="${u}" ${u === f[ku] ? 'selected' : ''}>${u}</option>`).join('')}</select>
+  </div></div>`;
+}
+function viewFlash() {
+  const f = S.flash, r = f.mRef ? R(f.mRef) : null;
+  return `
+  <section class="card space-y-3">
+    <div class="flex items-center justify-between">
+      <h2 class="h2">Dilution C₁V₁ = C₂V₂</h2>
+      <button data-a="clrC1" class="text-sm font-semibold text-muted px-3 py-1.5 -mr-2 rounded-lg active:bg-raised">Effacer</button>
+    </div>
+    <p class="text-[13px] text-muted -mt-1">Remplissez trois valeurs, laissez vide celle à calculer.</p>
+    ${frow('C₁, concentration de la mère', 'c1', 'u1', C1_UNITS)}
+    ${frow('V₁, volume de mère', 'v1', 'vu1', Object.keys(VU))}
+    ${frow('C₂, concentration finale', 'c2', 'u2', C1_UNITS)}
+    ${frow('V₂, volume final', 'v2', 'vu2', Object.keys(VU))}
+    <div id="c1res"></div>
+  </section>
+
+  <section class="card space-y-3">
+    <h2 class="h2">Masse à peser</h2>
+    <select class="sel w-full" data-in="flash.mRef" aria-label="Réactif">
+      <option value="" ${!f.mRef ? 'selected' : ''}>Masse molaire saisie à la main</option>
+      ${S.reagents.filter(x => !x.solvent).map(x => `<option value="${x.id}" ${x.id === f.mRef ? 'selected' : ''}>${esc(x.name)} (${esc(x.formula)})</option>`).join('')}
+    </select>
+    ${r ? (r.forms.length > 1 ? `<div class="flex gap-2 overflow-x-auto no-sb">${r.forms.map((fo, i) => `<button data-a="mForm" data-i="${i}" class="fchip ${i === (f.mForm || 0) ? 'on' : ''}"><span>${esc(fo.l)}</span><span class="text-[11px] font-normal opacity-80 num">${fmtMW(num(fo.mw))}</span></button>`).join('')}</div>` : `<p class="text-sm text-muted">${esc(r.formula)}, <span class="num text-ink font-semibold">${fmtMW(num(r.forms[0]?.mw))} g/mol</span></p>`)
+      : `<div><span class="lbl">Masse molaire (g/mol)</span><input class="inp num font-semibold" inputmode="decimal" enterkeyhint="done" data-in="flash.mMw" value="${esc(dv(f.mMw))}" placeholder="ex : 342,3"></div>`}
+    ${frow('Concentration voulue', 'mC', 'mU', SOLID_UNITS)}
+    ${frow('Volume de solution', 'mV', 'mVU', Object.keys(VU))}
+    <div id="mres"></div>
+  </section>`;
+}
+const resBox = (label, val, extra = '') => `<div class="rounded-xl bg-accent/10 border border-accent/30 p-4"><div class="text-sm text-muted">${label}</div><div class="text-3xl font-bold text-accent num mt-0.5">${val}</div>${extra ? `<div class="text-sm mt-2">${extra}</div>` : ''}</div>`;
+const hint = (t, err) => `<p class="text-sm ${err ? 'text-err' : 'text-muted'} rounded-xl border ${err ? 'border-err/30 bg-err/5' : 'border-line border-dashed'} p-3">${t}</p>`;
+function renderC1() {
+  const el = $('#c1res'); if (!el) return;
+  const f = S.flash, keys = ['c1', 'v1', 'c2', 'v2'];
+  const miss = keys.filter(k => !isFinite(num(f[k])));
+  if (miss.length !== 1) { el.innerHTML = hint(miss.length === 0 ? 'Videz le champ que vous voulez calculer.' : `Encore ${miss.length - 1} valeur${miss.length > 2 ? 's' : ''} à saisir.`); return; }
+  if (keys.some(k => k !== miss[0] && !(num(f[k]) > 0))) { el.innerHTML = hint('Les valeurs doivent être positives.', true); return; }
+  const a = CU[f.u1], b = CU[f.u2];
+  if (a.f !== b.f) { el.innerHTML = hint(`${f.u1} et ${f.u2} ne sont pas convertibles entre eux. Utilisez des unités de même nature.`, true); return; }
+  const c1 = num(f.c1) * a.k, c2 = num(f.c2) * b.k, v1 = num(f.v1) * VU[f.vu1], v2 = num(f.v2) * VU[f.vu2];
+  let label, val, V1 = v1, V2 = v2;
+  switch (miss[0]) {
+    case 'v1': V1 = c2 * v2 / c1; label = 'V₁ à pipeter'; val = fmtVol(V1); break;
+    case 'v2': V2 = c1 * v1 / c2; label = 'V₂, volume final'; val = fmtVol(V2); break;
+    case 'c1': label = 'C₁, concentration de la mère'; val = `${fmtC(c2 * v2 / v1 / a.k)} ${f.u1}`; break;
+    case 'c2': label = 'C₂, concentration finale'; val = `${fmtC(c1 * v1 / v2 / b.k)} ${f.u2}`; break;
+  }
+  if (V1 > V2 * (1 + 1e-9)) { el.innerHTML = resBox(label, val) + hint('V₁ dépasse V₂ : la concentration finale doit être inférieure à celle de la mère.', true); return; }
+  el.innerHTML = resBox(label, val, `${fmtVol(V1)} de mère + ${fmtVol(V2 - V1)} de diluant, dilution au 1/${fmtC(V2 / V1)}`);
+}
+function renderMass() {
+  const el = $('#mres'); if (!el) return;
+  const f = S.flash; let mw;
+  if (f.mRef) { const r = R(f.mRef); const fo = r?.forms[f.mForm] || r?.forms[0]; mw = num(fo?.mw); } else mw = num(f.mMw);
+  const C = num(f.mC), V = num(f.mV) * VU[f.mVU], u = CU[f.mU];
+  if (!(C > 0 && V > 0)) { el.innerHTML = hint('Saisissez la concentration et le volume.'); return; }
+  let g;
+  if (u.f === 'mol') { if (!(mw > 0)) { el.innerHTML = hint('Indiquez la masse molaire.', true); return; } g = C * u.k * mw * V / 1000; }
+  else g = C * u.k * V / 1000;
+  const r = f.mRef ? R(f.mRef) : null;
+  el.innerHTML = resBox('Masse à peser', fmtMass(g), `${r ? esc(rForm(r, f.mForm)) + ' ' : ''}pour ${fmtVol(V)} à ${fmtC(C)} ${f.mU}${u.f === 'mol' ? `, ${fmtMW(mw)} g/mol` : ''}`);
+}
+
+/* ============ Feuilles (bottom sheets) ============ */
+function openSheet(fn) {
+  sheetFn = fn; drawSheet();
+  const sh = $('#sheet');
+  if (sh.classList.contains('hidden')) {
+    sh.classList.remove('hidden'); document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => requestAnimationFrame(() => { $('#panel').classList.remove('translate-y-full'); $('#backdrop').classList.remove('opacity-0'); }));
+  }
+}
+function drawSheet() { if (!sheetFn) return; $('#sheetBody').innerHTML = sheetFn(); if (sheetFn === sheetPhos) updatePhos(); }
+function closeSheet() {
+  $('#panel').classList.add('translate-y-full'); $('#backdrop').classList.add('opacity-0');
+  document.body.style.overflow = '';
+  setTimeout(() => { if (!sheetFn) $('#sheet').classList.add('hidden'); }, 200);
+  sheetFn = null; edit = null;
+}
+const sheetTitle = (t, sub) => `<div><h3 class="text-lg font-semibold">${t}</h3>${sub ? `<p class="text-[13px] text-muted mt-1">${sub}</p>` : ''}</div>`;
+
+function sheetAdd() {
+  const item = (kind, id, name, sub, key) => `<button data-a="addComp" data-kind="${kind}" data-ref="${id}" data-name="${esc(key)}" class="srch w-full flex items-center justify-between gap-3 p-3 rounded-xl bg-raised/60 border border-line text-left active:bg-raised">
+    <span class="min-w-0"><span class="block font-semibold truncate">${esc(name)}</span><span class="block text-xs text-muted num mt-0.5">${sub}</span></span><span class="text-accent shrink-0">${ICON.plus}</span></button>`;
+  return `${sheetTitle('Ajouter un composant')}
+  <input class="inp" placeholder="Rechercher" data-search autocomplete="off" enterkeyhint="search" aria-label="Rechercher">
+  <div><h4 class="h2 mb-2">Solutions mères</h4><div class="space-y-1.5">${S.stocks.map(s => item('stock', s.id, s.name, `${fmtC(num(s.c))} ${esc(s.u)} dans ${s.solv === 'D2O' ? 'D₂O' : 'H₂O'}`, norm(s.name))).join('') || `<p class="text-sm text-muted">Aucune solution mère.</p>`}</div>
+    <button data-a="newStock" data-then="add" class="w-full mt-2 py-3 text-sm font-semibold text-accent">+ Nouvelle solution mère</button></div>
+  <div><h4 class="h2 mb-2">Réactifs solides</h4><div class="space-y-1.5">${S.reagents.filter(r => !r.solvent).map(r => item('solid', r.id, r.name, `${esc(rForm(r, r.sel))}, ${fmtMW(num((r.forms[r.sel] || r.forms[0])?.mw))} g/mol`, norm(r.name + ' ' + r.formula))).join('')}</div>
+    <button data-a="newReagent" data-then="add" class="w-full mt-2 py-3 text-sm font-semibold text-accent">+ Molécule personnalisée</button></div>`;
+}
+
+function sheetStock() {
+  const e = edit;
+  return `${sheetTitle(e._new ? 'Nouvelle solution mère' : 'Modifier la solution mère')}
+  <label class="block"><span class="lbl">Nom</span><input class="inp" data-ed="name" value="${esc(e.name)}" placeholder="ex : Phosphate de sodium pH 7"></label>
+  <div class="flex gap-2">
+    <label class="flex-1 min-w-0"><span class="lbl">Concentration</span><input class="inp num font-semibold" inputmode="decimal" enterkeyhint="done" data-ed="c" value="${esc(dv(e.c))}"></label>
+    <label class="w-28 shrink-0"><span class="lbl">Unité</span><select class="sel w-full" data-ed="u">${UNIT_LIST.map(u => `<option value="${u}" ${u === e.u ? 'selected' : ''}>${u}</option>`).join('')}</select></label>
+  </div>
+  <div><span class="lbl">Solvant de la mère</span><div class="seg w-full">${['H2O', 'D2O'].map(v => `<button data-a="edSet" data-k="solv" data-v="${v}" class="flex-1 ${e.solv === v ? 'on' : ''}">${v === 'D2O' ? 'D₂O' : 'H₂O'}</button>`).join('')}</div>
+    <p class="text-xs text-muted mt-1.5">Une mère dans D₂O est déduite du D₂O à ajouter.</p></div>
+  <label class="block"><span class="lbl">Masse molaire, facultative (g/mol)</span><input class="inp num" inputmode="decimal" enterkeyhint="done" data-ed="mw" value="${esc(dv(e.mw))}" placeholder="Permet de passer de M à mg/mL ou %"></label>
+  <div class="flex gap-2 pt-1">${!e._new ? `<button data-a="delStock" class="btn btn-d w-12 px-0 shrink-0" aria-label="Supprimer">${ICON.trash}</button>` : ''}<button data-a="saveStock" class="btn btn-p flex-1">Enregistrer la mère</button></div>`;
+}
+
+function sheetReagent() {
+  const e = edit;
+  return `${sheetTitle(e._new ? 'Molécule personnalisée' : 'Modifier le réactif', e._new ? 'Les chiffres de la formule passent en indice automatiquement.' : '')}
+  <label class="block"><span class="lbl">Nom</span><input class="inp" data-ed="name" value="${esc(e.name)}" placeholder="ex : Imidazole"></label>
+  <label class="block"><span class="lbl">Formule</span><input class="inp" data-ed="formula" value="${esc(e.formula)}" placeholder="ex : C3H4N2" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+  <div><span class="lbl">Formes et masses molaires (g/mol)</span>
+    <div class="space-y-2">${e.forms.map((f, i) => `<div class="flex gap-2">
+      <input class="inp w-28 shrink-0" data-fe="l" data-i="${i}" value="${esc(f.l)}" placeholder="${i ? '·2H2O' : 'Anhydre'}" autocapitalize="off" aria-label="Forme">
+      <input class="inp flex-1 min-w-0 num font-semibold" inputmode="decimal" enterkeyhint="done" data-fe="mw" data-i="${i}" value="${esc(dv(f.mw))}" placeholder="g/mol" aria-label="Masse molaire">
+      ${e.forms.length > 1 ? `<button data-a="rmForm" data-i="${i}" class="iconbtn h-12" aria-label="Retirer la forme">${ICON.x}</button>` : ''}
+    </div>`).join('')}</div>
+    <button data-a="addForm" class="w-full mt-2 py-3 text-sm font-semibold text-accent">+ Ajouter une forme hydratée</button>
+  </div>
+  ${e.solvent ? `<label class="block"><span class="lbl">Densité (g/mL)</span><input class="inp num" inputmode="decimal" data-ed="density" value="${esc(dv(e.density))}"></label>` : ''}
+  <div class="flex gap-2 pt-1">${!e._new && !e.solvent ? `<button data-a="delReagent" class="btn btn-d w-12 px-0 shrink-0" aria-label="Supprimer">${ICON.trash}</button>` : ''}<button data-a="saveReagent" class="btn btn-p flex-1">Enregistrer le réactif</button></div>`;
+}
+
+const phosCalc = p => { const C = num(p.c), pH = num(p.ph), pK = num(p.pka); if (!(C > 0) || !isFinite(pH) || !isFinite(pK)) return null; const r = 10 ** (pH - pK); return { base: C * r / (1 + r), acid: C / (1 + r), r }; };
+function sheetPhos() {
+  const p = edit;
+  return `${sheetTitle('Phosphate à pH donné', 'Henderson–Hasselbalch : ajoute la base et l’acide en solides, à concentration 1X.')}
+  <div><span class="lbl">Contre-ion</span><div class="seg w-full">${[['Na', 'Sodium'], ['K', 'Potassium']].map(([v, l]) => `<button data-a="edSet" data-k="cat" data-v="${v}" class="flex-1 ${p.cat === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
+  <div class="grid grid-cols-3 gap-2">
+    <label><span class="lbl">Total (mM)</span><input class="inp num font-semibold" inputmode="decimal" enterkeyhint="done" data-ed="c" value="${esc(dv(p.c))}"></label>
+    <label><span class="lbl">pH cible</span><input class="inp num font-semibold" inputmode="decimal" enterkeyhint="done" data-ed="ph" value="${esc(dv(p.ph))}"></label>
+    <label><span class="lbl">pKa₂</span><input class="inp num font-semibold" inputmode="decimal" enterkeyhint="done" data-ed="pka" value="${esc(dv(p.pka))}"></label>
+  </div>
+  <div id="phosPrev"></div>
+  <p class="text-xs text-muted">Le pKa₂ apparent vaut environ 6,8 vers 0,1 M (7,2 à force ionique nulle). Contrôlez toujours au pH-mètre.</p>
+  <button data-a="phosAdd" class="btn btn-p w-full">Ajouter au tampon</button>`;
+}
+function updatePhos() {
+  const el = $('#phosPrev'); if (!el) return;
+  const p = edit || S.phos, r = phosCalc(p), K = p.cat === 'K';
+  if (!r) { el.innerHTML = hint('Renseignez les trois valeurs.'); return; }
+  const box = (t, v) => `<div class="rounded-xl bg-raised border border-line p-3"><div class="text-xs text-muted">${t}</div><div class="text-xl font-bold text-solid num mt-0.5">${fmtC(v)} mM</div></div>`;
+  el.innerHTML = `<div class="grid grid-cols-2 gap-2">${box('Base, ' + (K ? 'K₂HPO₄' : 'Na₂HPO₄'), r.base)}${box('Acide, ' + (K ? 'KH₂PO₄' : 'NaH₂PO₄'), r.acid)}</div>
+    <p class="text-xs text-muted mt-2 num">Rapport base/acide ${fmtC(r.r)}, soit ${fmtPct(r.r / (1 + r.r) * 100)} % de base.</p>`;
+}
+
+function sheetSave() {
+  return `${sheetTitle('Enregistrer la recette', 'Volume, facteur, % D₂O et composants sont mémorisés. Un nom déjà utilisé met la recette à jour.')}
+  <label class="block"><span class="lbl">Nom</span><input class="inp" data-ed="name" value="${esc(edit.name)}"></label>
+  <button data-a="saveRec" class="btn btn-p w-full">Enregistrer la recette</button>`;
+}
+
+function sheetSettings() {
+  return `${sheetTitle('Réglages et sauvegarde')}
+  <div><span class="lbl">Thème</span><div class="seg w-full"><button data-a="theme" data-v="dark" class="flex-1 ${S.theme !== 'light' ? 'on' : ''}">Sombre</button><button data-a="theme" data-v="light" class="flex-1 ${S.theme === 'light' ? 'on' : ''}">Clair</button></div></div>
+  <div><span class="lbl">Exporter mes données</span><div class="grid grid-cols-2 gap-2"><button data-a="exportDl" class="btn btn-g">Fichier JSON</button><button data-a="exportCopy" class="btn btn-g">Copier le JSON</button></div></div>
+  <div class="space-y-2"><span class="lbl">Importer</span>
+    <label class="btn btn-g w-full cursor-pointer">Choisir un fichier JSON<input type="file" accept=".json,application/json,text/plain" data-file class="hidden"></label>
+    <textarea class="inp h-24 py-2 text-sm" data-paste placeholder="Ou collez le JSON ici" aria-label="JSON à importer"></textarea>
+    <button data-a="importText" class="btn btn-g w-full">Importer le texte collé</button>
+  </div>
+  <div class="pt-3 border-t border-line space-y-3">
+    <button data-a="resetAll" class="btn btn-d w-full">Réinitialiser toutes les données</button>
+    <p class="text-xs text-muted text-center num">${S.reagents.length} réactifs, ${S.stocks.length} mères et ${S.recipes.length} recettes, enregistrés sur cet appareil${storageOK ? '' : ' (stockage indisponible ici)'}.</p>
+  </div>`;
+}
+function sheetImport() {
+  const n = k => Array.isArray(pending?.[k]) ? pending[k].length : 0;
+  return `${sheetTitle('Importer des données', `Le fichier contient ${n('reagents')} réactifs, ${n('stocks')} mères et ${n('recipes')} recettes.`)}
+  <button data-a="importDo" data-m="merge" class="btn btn-p w-full">Fusionner avec mes données</button>
+  <button data-a="importDo" data-m="replace" class="btn btn-d w-full">Tout remplacer</button>
+  <button data-a="settings" class="btn btn-g w-full">Annuler</button>`;
+}
+
+/* ============ Actions ============ */
+function addComp(kind, ref) {
+  const c = { uid: uid(), kind, ref, c: '', u: 'mM' };
+  if (kind === 'stock') { const s = ST(ref); const f = CU[s?.u]?.f; c.u = f === 'mol' ? 'mM' : (s?.u || 'mM'); }
+  else c.form = R(ref)?.sel || 0;
+  S.draft.comps.push(c); S.tab = 'buf'; persist(); render();
+  setTimeout(() => { const i = document.querySelector(`[data-cin="c"][data-uid="${c.uid}"]`); if (i) { i.scrollIntoView({ block: 'center', behavior: 'smooth' }); i.focus({ preventScroll: true }); } }, 80);
+}
+function autoName(d) {
+  const parts = d.comps.map(c => c.kind === 'stock' ? ST(c.ref)?.name.split(' ')[0] : R(c.ref)?.formula).filter(Boolean).slice(0, 4);
+  return `Tampon ${fmtC(num(d.x) || 1)}X ${parts.join('/')}${num(d.d2o) > 0 ? ` ${fmtPct(num(d.d2o))} % D₂O` : ''}`.replace(/\s+/g, ' ').trim();
+}
+async function copyText(t) {
+  try { await navigator.clipboard.writeText(t); return true; }
+  catch (e) {
+    const ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;opacity:0;top:0';
+    document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (_) { } ta.remove(); return ok;
+  }
+}
+const exportData = () => JSON.stringify({ app: 'tampons-paillasse', version: 1, date: new Date().toISOString(), reagents: S.reagents, stocks: S.stocks, recipes: S.recipes }, null, 2);
+function handleImport(txt) {
+  let d; try { d = JSON.parse(txt); } catch (e) { toast('JSON illisible'); return; }
+  if (!d || !(Array.isArray(d.reagents) || Array.isArray(d.stocks) || Array.isArray(d.recipes))) { toast('Ce fichier ne contient pas de données de tampons'); return; }
+  pending = d; openSheet(sheetImport);
+}
+function cleanList(k, arr) {
+  return (Array.isArray(arr) ? arr : []).filter(x => x && typeof x === 'object' && x.id &&
+    (k !== 'reagents' || (Array.isArray(x.forms) && x.forms.length)) && (k !== 'recipes' || Array.isArray(x.comps)));
+}
+function applyTheme() {
+  document.documentElement.dataset.theme = S.theme === 'light' ? 'light' : 'dark';
+  $('#tc').setAttribute('content', S.theme === 'light' ? '#f0f3f7' : '#0f1620');
+}
+
+const A = {
+  tab: el => { S.tab = el.dataset.t; persist(); render(); window.scrollTo(0, 0); },
+  setDraft: el => { const k = el.dataset.k; S.draft[k] = k === 'vu' ? el.dataset.v : +el.dataset.v; persist(); render(); },
+  newDraft: () => { if (S.draft.comps.length && !confirm('Effacer le tampon en cours ?')) return; S.draft = emptyDraft(); ticks.clear(); persist(); render(); },
+  addSheet: () => openSheet(sheetAdd),
+  addComp: el => { const { kind, ref } = el.dataset; closeSheet(); addComp(kind, ref); },
+  rmComp: el => { S.draft.comps = S.draft.comps.filter(c => c.uid !== el.dataset.uid); ticks.delete(el.dataset.uid); persist(); render(); },
+  setForm: el => { const c = comp(el.dataset.uid); if (!c) return; c.form = +el.dataset.i; const r = R(c.ref); if (r) r.sel = c.form; persist(); render(); },
+  tick: el => { const k = el.dataset.k; ticks.has(k) ? ticks.delete(k) : ticks.add(k); renderResults(); },
+  untick: () => { ticks.clear(); renderResults(); },
+  phos: () => { edit = S.phos; openSheet(sheetPhos); },
+  phosAdd: () => {
+    const p = S.phos, res = phosCalc(p); if (!res) return toast('Paramètres invalides');
+    const [b, a] = p.cat === 'K' ? ['r_k2hpo4', 'r_kh2po4'] : ['r_na2hpo4', 'r_nah2po4'];
+    const rb = R(b), ra = R(a); if (!rb || !ra) return toast('Réactifs phosphate introuvables dans la base');
+    S.draft.comps.push({ uid: uid(), kind: 'solid', ref: b, form: rb.sel || 0, c: +res.base.toPrecision(4), u: 'mM' },
+      { uid: uid(), kind: 'solid', ref: a, form: ra.sel || 0, c: +res.acid.toPrecision(4), u: 'mM' });
+    persist(); closeSheet(); render(); toast('Phosphate ajouté');
+  },
+  saveSheet: () => { edit = { name: S.draft.name || autoName(S.draft) }; openSheet(sheetSave); },
+  saveRec: () => {
+    const name = String(edit?.name || '').trim(); if (!name) return toast('Donnez un nom à la recette');
+    const d = S.draft;
+    const rec = { id: 'rc_' + uid(), name, vol: d.vol, vu: d.vu, x: d.x, d2o: d.d2o, comps: d.comps.map(({ uid, ...c }) => c) };
+    const i = S.recipes.findIndex(r => r.name.trim().toLowerCase() === name.toLowerCase());
+    if (i >= 0) { rec.id = S.recipes[i].id; S.recipes[i] = rec; } else S.recipes.unshift(rec);
+    d.name = name; persist(); closeSheet(); render(); toast(i >= 0 ? 'Recette mise à jour' : 'Recette enregistrée');
+  },
+  loadRec: el => { const r = S.recipes.find(x => x.id === el.dataset.id); if (!r) return; S.draft = recipeToDraft(clone(r)); ticks.clear(); S.tab = 'buf'; persist(); render(); window.scrollTo(0, 0); toast('Recette chargée'); },
+  delRec: el => { const r = S.recipes.find(x => x.id === el.dataset.id); if (!r || !confirm(`Supprimer « ${r.name} » ?`)) return; S.recipes = S.recipes.filter(x => x !== r); persist(); render(); toast('Recette supprimée'); },
+  copyProto: () => {
+    const d = S.draft, o = compute(d); if (o.fatal) return toast(o.fatal);
+    const head = `${d.name || autoName(d)}\n${fmtVol(num(d.vol) * VU[d.vu])}, ${fmtC(num(d.x) || 1)}X, ${fmtPct(num(d.d2o) || 0)} % D₂O`;
+    const lines = o.steps.map((s, i) => `${i + 1}. ${KB[s.k][0]} ${s.title} : ${s.err ? '⚠ ' + s.err : s.amt}${!s.err && s.sub ? ` (${s.sub})` : ''}`);
+    copyText([head, '', ...lines, ...o.warns.map(w => '⚠ ' + w)].join('\n')).then(ok => toast(ok ? 'Protocole copié' : 'Copie impossible'));
+  },
+  stkTab: el => { ui.stk = el.dataset.v; render(); },
+  newStock: el => { edit = { _new: true, _then: el.dataset.then || '', name: '', c: '', u: 'mM', solv: 'H2O', mw: '' }; openSheet(sheetStock); },
+  editStock: el => { const s = ST(el.dataset.id); if (!s) return; edit = { ...s, c: dv(s.c), mw: dv(s.mw) }; openSheet(sheetStock); },
+  edSet: el => { if (!edit) return; edit[el.dataset.k] = el.dataset.v; if (sheetFn === sheetPhos) persist(); drawSheet(); },
+  saveStock: () => {
+    const e = edit, name = String(e.name || '').trim(), c = num(e.c);
+    if (!name) return toast('Donnez un nom à la mère');
+    if (!(c > 0)) return toast('Concentration invalide');
+    const s = { id: e._new ? 's_' + uid() : e.id, name, c, u: e.u, solv: e.solv, mw: num(e.mw) > 0 ? num(e.mw) : '' };
+    const i = S.stocks.findIndex(x => x.id === s.id); if (i >= 0) S.stocks[i] = s; else S.stocks.push(s);
+    const then = e._then; persist(); closeSheet();
+    if (then === 'add') addComp('stock', s.id); else render();
+    toast('Mère enregistrée');
+  },
+  delStock: () => {
+    const used = S.recipes.filter(r => r.comps.some(c => c.kind === 'stock' && c.ref === edit.id)).length;
+    if (!confirm(`Supprimer « ${edit.name} » ?${used ? `\nElle est utilisée dans ${used} recette(s).` : ''}`)) return;
+    S.stocks = S.stocks.filter(s => s.id !== edit.id); persist(); closeSheet(); render(); toast('Mère supprimée');
+  },
+  newReagent: el => { edit = { _new: true, _then: el.dataset.then || '', name: '', formula: '', forms: [{ l: 'Anhydre', mw: '' }] }; openSheet(sheetReagent); },
+  editReagent: el => { const r = R(el.dataset.id); if (!r) return; edit = clone(r); edit.forms.forEach(f => f.mw = dv(f.mw)); edit.density = dv(r.density); openSheet(sheetReagent); },
+  addForm: () => { edit.forms.push({ l: '', mw: '' }); drawSheet(); },
+  rmForm: el => { edit.forms.splice(+el.dataset.i, 1); drawSheet(); },
+  saveReagent: () => {
+    const e = edit, name = String(e.name || '').trim();
+    if (!name) return toast('Donnez un nom au réactif');
+    const forms = e.forms.map((f, i) => ({ l: subscript(String(f.l || '').trim()) || (i ? `Forme ${i + 1}` : 'Anhydre'), mw: num(f.mw) })).filter(f => f.mw > 0);
+    if (!forms.length) return toast('Indiquez au moins une masse molaire');
+    const r = { id: e._new ? 'r_' + uid() : e.id, name, formula: subscript(String(e.formula || '').trim()) || name, forms, sel: Math.min(+e.sel || 0, forms.length - 1), custom: e._new ? true : !!e.custom };
+    if (e.solvent) { r.solvent = true; r.density = num(e.density) > 0 ? num(e.density) : 1.107; }
+    const i = S.reagents.findIndex(x => x.id === r.id); if (i >= 0) S.reagents[i] = r; else S.reagents.push(r);
+    const then = e._then; persist(); closeSheet();
+    if (then === 'add') addComp('solid', r.id); else render();
+    toast('Réactif enregistré');
+  },
+  delReagent: () => { if (!confirm(`Supprimer « ${edit.name} » ?`)) return; S.reagents = S.reagents.filter(r => r.id !== edit.id); persist(); closeSheet(); render(); toast('Réactif supprimé'); },
+  setSel: el => { const r = R(el.dataset.id); if (!r) return; r.sel = +el.dataset.i; persist(); render(); },
+  clrC1: () => { Object.assign(S.flash, { c1: '', v1: '', c2: '', v2: '' }); persist(); render(); },
+  mForm: el => { S.flash.mForm = +el.dataset.i; persist(); render(); },
+  settings: () => { pending = null; openSheet(sheetSettings); },
+  theme: el => { S.theme = el.dataset.v; applyTheme(); persist(); drawSheet(); },
+  exportDl: () => {
+    try {
+      const blob = new Blob([exportData()], { type: 'application/json' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = `tampons-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast('Export téléchargé');
+    } catch (e) { toast('Téléchargement impossible, utilisez « Copier le JSON »'); }
+  },
+  exportCopy: () => copyText(exportData()).then(ok => toast(ok ? 'JSON copié dans le presse-papiers' : 'Copie impossible')),
+  importText: () => { const t = $('[data-paste]')?.value.trim(); if (!t) return toast('Collez d’abord le JSON'); handleImport(t); },
+  importDo: el => {
+    const d = pending; if (!d) return;
+    for (const k of ['reagents', 'stocks', 'recipes']) {
+      const inc = cleanList(k, d[k]);
+      if (el.dataset.m === 'replace') S[k] = inc;
+      else { const m = new Map(S[k].map(x => [x.id, x])); inc.forEach(x => m.set(x.id, x)); S[k] = [...m.values()]; }
+    }
+    S.reagents.forEach(r => { r.sel = Math.min(+r.sel || 0, r.forms.length - 1); });
+    pending = null; persist(); closeSheet(); render(); toast('Import terminé');
+  },
+  resetAll: () => {
+    if (!confirm('Réinitialiser toutes les données ? Vos mères, réactifs et recettes seront remplacés par les valeurs par défaut.')) return;
+    const theme = S.theme; S = defaults(); S.theme = theme; ticks.clear(); flush(); closeSheet(); render(); toast('Données réinitialisées');
+  },
+  closeSheet: () => closeSheet()
+};
+
+/* ============ Événements ============ */
+function setPath(p, v) { const ks = p.split('.'); let o = S; for (let i = 0; i < ks.length - 1; i++) o = o[ks[i]]; o[ks[ks.length - 1]] = v; }
+function onField(t) {
+  const ds = t.dataset;
+  if (ds.in) {
+    setPath(ds.in, t.value); persist();
+    if (ds.in.startsWith('draft.')) { syncChips(); renderResults(); }
+    else if (ds.in === 'flash.mRef') { S.flash.mForm = R(t.value)?.sel || 0; render(); }
+    else if (ds.in.startsWith('flash.')) { renderC1(); renderMass(); }
+  } else if (ds.cin) {
+    const c = comp(ds.uid); if (c) { c[ds.cin] = t.value; persist(); renderResults(); }
+  } else if (ds.ed) {
+    if (edit) { edit[ds.ed] = t.value; if (sheetFn === sheetPhos) { persist(); updatePhos(); } }
+  } else if (ds.fe) {
+    if (edit && edit.forms[+ds.i]) edit.forms[+ds.i][ds.fe] = t.value;
+  } else if ('search' in ds) {
+    const q = norm(t.value.trim()), root = t.closest('#sheetBody') || $('#view');
+    root.querySelectorAll('.srch').forEach(n => { n.style.display = !q || (n.dataset.name || '').includes(q) ? '' : 'none'; });
+  }
+}
+document.addEventListener('input', e => { if (e.target.tagName !== 'SELECT') onField(e.target); });
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.tagName === 'SELECT') onField(t);
+  else if ('file' in t.dataset && t.files && t.files[0]) {
+    const fr = new FileReader(); fr.onload = () => handleImport(String(fr.result)); fr.readAsText(t.files[0]); t.value = '';
+  }
+});
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-a]'); if (!el) return;
+  const f = A[el.dataset.a]; if (f) { e.preventDefault(); f(el, e); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && sheetFn) closeSheet();
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.getAttribute('inputmode') === 'decimal') e.target.blur();
+});
+
+let tt = null;
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.remove('opacity-0'); clearTimeout(tt); tt = setTimeout(() => t.classList.add('opacity-0'), 1900); }
+
+/* ============ Démarrage ============ */
+$('#logo').innerHTML = ICON.beaker; $('#gear').innerHTML = ICON.gear;
+applyTheme(); render();
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+if (!storageOK) toast('Stockage local indisponible : exportez vos données');
+</script>
+</body>
+</html>
