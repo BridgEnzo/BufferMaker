@@ -1,0 +1,2771 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#f2f1ee">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RMN Bench">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>RMN Bench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" media="print" onload="this.media='all'">
+<style>
+  :root {
+    /* Surfaces — gris chaud */
+    --bg: #f2f1ee;
+    --surface: #ffffff;
+    --surface-2: #f7f6f3;
+    --surface-3: #efede8;
+    --border: #e4e1da;
+    --border-strong: #cdc9c0;
+    --hair: rgba(28, 25, 20, 0.07);
+
+    /* Encre */
+    --text: #17181b;
+    --text-dim: #53555c;
+    --text-muted: #8a8c93;
+    --ink: #17181b;
+
+    /* Signal (validation) */
+    --accent: #1f7a5a;
+    --accent-soft: #eaf4ef;
+    --accent-line: #b9dccb;
+
+    /* Sémantique paillasse */
+    --must: #9b2148;   /* Moût */
+    --buf:  #6741d9;   /* Tampon nX */
+    --d2o:  #0b7f95;   /* D₂O */
+    --phos: #1c64d6;   /* Système tampon (mère) */
+    --dss:  #2b8a3e;   /* DSS */
+    --nan3: #d9480f;   /* NaN₃ */
+    --water:#6b6f78;   /* H₂O */
+
+    /* Alias rétro-compatibles */
+    --blue: var(--phos);
+    --purple: var(--buf);
+    --amber: #b86e00;
+    --rose: #d6336c;
+    --danger: #d03535;
+
+    --sh-1: 0 0 0 1px var(--hair), 0 1px 2px rgba(28,25,20,.04), 0 3px 8px -4px rgba(28,25,20,.08);
+    --sh-2: 0 0 0 1px var(--hair), 0 2px 4px rgba(28,25,20,.04), 0 12px 32px -12px rgba(28,25,20,.18);
+    --sh-btn: 0 1px 0 rgba(255,255,255,.12) inset, 0 1px 2px rgba(0,0,0,.18), 0 6px 16px -6px rgba(0,0,0,.35);
+
+    --ease: cubic-bezier(.2, .8, .2, 1);
+    --spring: cubic-bezier(.32, .72, 0, 1);
+
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html { background: var(--bg); }
+  body {
+    font-family: var(--sans);
+    font-feature-settings: "cv11", "ss01";
+    font-variant-numeric: tabular-nums;
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(120% 60% at 50% -10%, rgba(255,255,255,.85), rgba(255,255,255,0) 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.09 0 0 0 0 0.07 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-attachment: fixed;
+    color: var(--text);
+    max-width: 440px;
+    margin: 0 auto;
+    padding: max(12px, env(safe-area-inset-top)) 14px calc(108px + env(safe-area-inset-bottom));
+    line-height: 1.38;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+  }
+  button, input, select { font-family: inherit; font-variant-numeric: tabular-nums; }
+  button { -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 2px 16px;
+  }
+  .brand-wrap { display: flex; align-items: center; gap: 10px; }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: var(--ink); color: #fff;
+    display: grid; place-items: center;
+    box-shadow: var(--sh-btn);
+  }
+  .brand-mark svg { width: 18px; height: 18px; }
+  .brand { display: block; font-size: 1.06rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+  .brand-sub { display: block; font-family: var(--mono); font-size: .64rem; font-weight: 600; color: var(--text-muted); letter-spacing: .02em; margin-top: 2px; }
+  .pill-badge {
+    font-family: var(--mono);
+    font-size: .74rem; font-weight: 700;
+    color: var(--text);
+    background: var(--surface);
+    box-shadow: var(--sh-1);
+    padding: 6px 11px 6px 9px;
+    border-radius: 99px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .pill-badge::before {
+    content: ""; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  /* ---------- Vues ---------- */
+  .view { display: none; }
+  .view.active { display: block; animation: viewIn .32s var(--ease) both; }
+  @keyframes viewIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .view-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 4px 10px; }
+  .view-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.035em; }
+  .view-kicker { font-family: var(--mono); font-size: .66rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; }
+
+  /* ---------- Cartes ---------- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 2px rgba(28,25,20,.04), 0 4px 14px -6px rgba(28,25,20,.08);
+  }
+  .card-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px; min-height: 30px;
+  }
+  .card-title {
+    font-size: .7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .09em;
+    color: var(--text-muted);
+  }
+  .eyebrow { display:block; font-size: .64rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--text-muted); margin: 0 0 7px 2px; }
+
+  /* ---------- Hero visuels ---------- */
+  .visual-hero { display: flex; align-items: center; gap: 14px; }
+  .hero-figure {
+    flex-shrink: 0;
+    display: grid; place-items: center;
+    width: 92px; align-self: stretch;
+    background:
+      linear-gradient(180deg, var(--surface-2), var(--surface-3));
+    border-radius: 14px;
+    box-shadow: inset 0 0 0 1px var(--hair), inset 0 -10px 20px -14px rgba(0,0,0,.2);
+    padding: 8px 0;
+  }
+  .hero-stats { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; min-width: 0; }
+  .stat-tile {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 9px 10px 10px;
+    min-width: 0;
+  }
+  .stat-lbl {
+    font-size: .64rem; font-weight: 600; color: var(--text-muted);
+    display: flex; align-items: center; gap: 5px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+  .stat-lbl i, .dot { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; display: inline-block; }
+  .stat-val {
+    display: block;
+    font-family: var(--mono);
+    font-size: .9rem; font-weight: 700; letter-spacing: -.02em;
+    color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* SVG liquides : transitions de hauteur */
+  .liquid rect { transition: y .55s var(--ease), height .55s var(--ease), fill .3s; }
+  .tube-svg, .bottle-svg { display: block; overflow: visible; filter: drop-shadow(0 6px 6px rgba(28,25,20,.12)); }
+
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; padding-top: 11px; border-top: 1px dashed var(--border); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 600; color: var(--text-dim); }
+
+  /* ---------- Sélecteur ---------- */
+  .select-clean {
+    width: 100%;
+    appearance: none; -webkit-appearance: none;
+    background: var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%2353555c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 4.5l3 3 3-3'/%3E%3C/svg%3E") no-repeat right 14px center;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 13px 38px 13px 14px;
+    font-size: 1rem; font-weight: 600;
+    letter-spacing: -.01em;
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s, background-color .15s;
+  }
+  .select-clean:focus { border-color: var(--ink); background-color: var(--surface); box-shadow: 0 0 0 4px rgba(23,24,27,.07); }
+
+  .meta-row {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
+    margin-top: 11px;
+    font-size: .76rem; color: var(--text-dim);
+  }
+  .meta-row strong { font-family: var(--mono); font-weight: 700; color: var(--text); font-size: .86rem; }
+  .remain { display: inline-flex; align-items: baseline; gap: 6px; }
+  #asb-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+
+  .tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: .68rem; font-weight: 600; line-height: 1;
+    padding: 5px 8px;
+    border-radius: 7px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .tag.frozen { background: #f1edff; color: #5536c2; border-color: #dcd3fb; }
+  .tag.frozen::before { content: "❄"; font-size: .7rem; }
+  .tag.cold { background: #e9f3fb; color: #1b5f9e; border-color: #c6def3; }
+  .tag.exp { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+  /* ---------- Filtres expériences ---------- */
+  .exp-bar {
+    display: flex; gap: 6px;
+    overflow-x: auto;
+    padding: 2px 2px 6px;
+    margin: 0 -2px 8px;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+  .exp-bar::-webkit-scrollbar { display: none; }
+  .exp-chip {
+    scroll-snap-align: start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 99px;
+    padding: 9px 14px;
+    font-size: .76rem; font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color .15s, color .15s, transform .12s;
+  }
+  .exp-chip:active { transform: scale(.96); }
+  .exp-chip.active { background: var(--ink); border-color: var(--ink); color: #fff; box-shadow: var(--sh-btn); }
+
+  /* ---------- Étapes de pipetage ---------- */
+  .steps-meta {
+    display: flex; align-items: center; gap: 10px;
+    margin: -2px 0 10px;
+    font-family: var(--mono); font-size: .68rem; font-weight: 600; color: var(--text-muted);
+  }
+  .steps-bar { flex: 1; height: 4px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+  .steps-bar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width .4s var(--ease); }
+  .steps-meta.complete { color: var(--accent); }
+
+  .step {
+    --c: var(--text);
+    position: relative;
+    display: flex; align-items: center; justify-content: space-between;
+    min-height: 64px;
+    padding: 11px 14px 11px 16px;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    background: var(--surface);
+    overflow: hidden;
+    transition: background-color .2s, border-color .2s, transform .12s var(--ease), box-shadow .2s;
+  }
+  .step::before {
+    content: ""; position: absolute; left: 0; top: 10px; bottom: 10px;
+    width: 3.5px; border-radius: 0 3px 3px 0;
+    background: var(--c);
+    transition: opacity .2s;
+  }
+  .step:last-of-type { margin-bottom: 0; }
+  .step:not(.static):active { transform: scale(.985); background: var(--surface-2); }
+  .step.static { cursor: default; min-height: 58px; background: var(--surface-2); }
+  .step.done {
+    background: var(--accent-soft);
+    border-color: var(--accent-line);
+  }
+  .step.done::before { opacity: 0; }
+  .step-left { display: flex; align-items: center; gap: 13px; min-width: 0; }
+  .step-txt { min-width: 0; }
+  .chk {
+    width: 28px; height: 28px;
+    border-radius: 9px;
+    border: 1.75px solid var(--border-strong);
+    background: var(--surface);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    transition: background-color .2s, border-color .2s, transform .25s var(--spring);
+  }
+  .chk svg { width: 16px; height: 16px; stroke: #fff; stroke-width: 2.6; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 16; stroke-dashoffset: 16; }
+  .step.done .chk { background: var(--accent); border-color: var(--accent); transform: scale(1.04); box-shadow: 0 2px 8px -2px rgba(31,122,90,.55); }
+  .step.done .chk svg { animation: drawChk .32s .04s var(--ease) forwards; }
+  @keyframes drawChk { to { stroke-dashoffset: 0; } }
+  .step-name { font-size: .92rem; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .step-sub { font-size: .72rem; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .step.done .step-name { color: var(--text-dim); }
+  .step-val {
+    font-family: var(--mono);
+    font-size: 1.12rem; font-weight: 700; letter-spacing: -.03em;
+    flex-shrink: 0; margin-left: 10px;
+    color: var(--c);
+    text-align: right;
+    transition: color .2s, opacity .2s;
+  }
+  .step-val small { font-size: .7rem; font-weight: 600; opacity: .7; margin-left: 2px; letter-spacing: 0; }
+  .step.done .step-val { color: var(--accent); opacity: .75; text-decoration: line-through; text-decoration-thickness: 1.5px; }
+
+  /* ---------- Flacons (réactifs) ---------- */
+  .vial-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .vial-card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px 6px 10px;
+    display: flex; flex-direction: column; align-items: center;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(28,25,20,.04);
+    transition: border-color .18s, box-shadow .18s, transform .12s var(--ease), background-color .18s;
+  }
+  .vial-card:active { transform: scale(.97); }
+  .vial-card.selected { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink), 0 8px 20px -10px rgba(0,0,0,.3); }
+  .vial-card.low::after {
+    content: "BAS"; position: absolute; top: 7px; right: 7px;
+    font-family: var(--mono); font-size: .52rem; font-weight: 700; letter-spacing: .04em;
+    color: #fff; background: var(--danger); padding: 2px 4px; border-radius: 4px;
+  }
+  .vial-card svg { overflow: visible; }
+  .vial-name { font-size: .78rem; font-weight: 700; margin-top: 7px; text-align: center; letter-spacing: -.01em; }
+  .vial-vol { font-family: var(--mono); font-size: .86rem; font-weight: 700; margin-top: 1px; letter-spacing: -.02em; }
+  .vial-conc { font-family: var(--mono); font-size: .62rem; color: var(--text-muted); }
+  .vial-meter { width: 70%; height: 3px; background: var(--surface-3); border-radius: 99px; margin-top: 6px; overflow: hidden; }
+  .vial-meter i { display: block; height: 100%; border-radius: 99px; }
+
+  /* ---------- Échantillons ---------- */
+  .smp-group { position: relative; margin-bottom: 10px; }
+  .smp-group.has-stack { padding-bottom: 7px; }
+  .smp-group.has-stack::before, .smp-group.has-stack::after {
+    content: ""; position: absolute; left: 10px; right: 10px; bottom: 0; height: 14px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 0 0 14px 14px; z-index: 0;
+    box-shadow: 0 2px 4px rgba(28,25,20,.05);
+  }
+  .smp-group.has-stack::after { left: 20px; right: 20px; bottom: -5px; z-index: -1; background: var(--surface-2); }
+  .smp-card {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px 12px 12px 10px;
+    margin-bottom: 7px;
+    box-shadow: 0 1px 2px rgba(28,25,20,.04);
+    transition: border-color .18s, box-shadow .18s, background-color .18s;
+  }
+  .smp-group .smp-card:last-child { margin-bottom: 0; }
+  .smp-card.active { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink), 0 10px 24px -14px rgba(0,0,0,.35); }
+  .smp-card.child { margin-left: 18px; }
+  .smp-card.child::before {
+    content: ""; position: absolute; left: -12px; top: -8px; width: 9px; height: 34px;
+    border-left: 1.5px solid var(--border-strong); border-bottom: 1.5px solid var(--border-strong);
+    border-bottom-left-radius: 8px;
+  }
+  .smp-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; cursor: pointer; }
+  .smp-left:active { opacity: .7; }
+  .smp-title { font-size: .9rem; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .smp-card.active .smp-title::after { content: " ●"; color: var(--accent); font-size: .6rem; vertical-align: 2px; }
+  .smp-exp-line { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .smp-meta { font-size: .7rem; color: var(--text-muted); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .smp-right { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; flex-shrink: 0; }
+  .vol-badge {
+    font-family: var(--mono);
+    font-size: .88rem; font-weight: 700; letter-spacing: -.02em;
+    color: var(--text);
+  }
+  .vol-badge small { font-size: .66rem; color: var(--text-muted); font-weight: 600; margin-left: 2px; }
+  .smp-btns { display: flex; gap: 5px; }
+  .stack-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 7px;
+    padding: 4px 8px;
+    font-size: .66rem; font-weight: 700;
+    cursor: pointer;
+  }
+  .stack-btn:active { background: var(--surface-3); }
+
+  /* ---------- Jauge pH ---------- */
+  .ph-gauge {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 13px 10px;
+    margin-bottom: 10px;
+  }
+  .ph-gauge-top { display: flex; justify-content: space-between; font-size: .72rem; font-weight: 600; color: var(--text-dim); margin-bottom: 10px; font-family: var(--mono); }
+  .ph-track {
+    position: relative; height: 10px; border-radius: 99px;
+    background: linear-gradient(90deg, #e03131 0%, #f76707 18%, #fab005 32%, #82c91e 46%, #2f9e44 56%, #1098ad 68%, #4263eb 82%, #7048e8 100%);
+    opacity: .9;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.18);
+  }
+  .ph-zone {
+    position: absolute; top: -4px; height: 18px;
+    background: rgba(255,255,255,.28);
+    border: 2px solid var(--ink);
+    border-radius: 7px;
+  }
+  .ph-cursor {
+    position: absolute; top: -6px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #fff;
+    border: 5px solid var(--ink);
+    box-shadow: 0 2px 6px rgba(0,0,0,.3);
+    transform: translateX(-11px);
+    transition: left .35s var(--ease);
+  }
+  .ph-scale-nums { display: flex; justify-content: space-between; font-family: var(--mono); font-size: .62rem; color: var(--text-muted); margin-top: 8px; }
+
+  /* ---------- Champs ---------- */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+  .field {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 11px 7px;
+    transition: border-color .15s, background-color .15s, box-shadow .15s;
+    min-width: 0;
+  }
+  .field:focus-within { background: var(--surface); border-color: var(--ink); box-shadow: 0 0 0 4px rgba(23,24,27,.07); }
+  .field label {
+    display: block;
+    font-size: .63rem; font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .field input, .field select {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 1rem; font-weight: 700; letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+    outline: none;
+    padding: 1px 0;
+  }
+  .field select { appearance: none; -webkit-appearance: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='none' stroke='%238a8c93' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='M2 3.5l3 3 3-3'/%3E%3C/svg%3E") no-repeat right center; padding-right: 14px; }
+  .field input::placeholder { color: #b9b7b0; font-weight: 500; }
+  .field input.txt, .field select.txt { font-family: var(--sans); font-size: .9rem; font-weight: 600; letter-spacing: -.01em; }
+
+  /* ---------- Contrôle segmenté ---------- */
+  .seg {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    background: var(--surface-3);
+    border-radius: 13px;
+    padding: 4px; gap: 4px;
+    margin-bottom: 12px;
+    box-shadow: inset 0 1px 2px rgba(28,25,20,.06);
+  }
+  .seg button {
+    background: transparent; border: none;
+    font-family: var(--mono); font-size: .86rem; font-weight: 600;
+    color: var(--text-dim);
+    padding: 10px 0;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background-color .18s, color .18s, box-shadow .18s, transform .12s;
+  }
+  .seg button:active { transform: scale(.95); }
+  .seg button.active { background: var(--surface); color: var(--text); font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 2px 6px -2px rgba(0,0,0,.12); }
+
+  /* ---------- Boutons ---------- */
+  .btn-main {
+    width: 100%;
+    min-height: 54px;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 15px;
+    padding: 14px;
+    font-size: .95rem; font-weight: 600; letter-spacing: -.01em;
+    cursor: pointer;
+    margin-top: 14px;
+    box-shadow: var(--sh-btn);
+    transition: transform .12s var(--ease), background-color .25s, box-shadow .25s;
+  }
+  .btn-main:active { transform: scale(.98); }
+  .btn-main.ready { background: var(--accent); box-shadow: 0 1px 0 rgba(255,255,255,.15) inset, 0 8px 22px -8px rgba(31,122,90,.7); animation: readyPulse 1.8s var(--ease) infinite; }
+  .btn-main.ok { background: var(--accent); animation: none; }
+  @keyframes readyPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(31,122,90,.35), 0 8px 22px -8px rgba(31,122,90,.7); } 50% { box-shadow: 0 0 0 6px rgba(31,122,90,0), 0 8px 22px -8px rgba(31,122,90,.7); } }
+
+  .btn-danger {
+    background: var(--danger); color: #fff; border: none;
+    border-radius: 14px; padding: 14px;
+    font-size: .9rem; font-weight: 600;
+    cursor: pointer; width: 100%;
+    box-shadow: 0 6px 16px -8px rgba(208,53,53,.6);
+    transition: transform .12s;
+  }
+  .btn-danger:active { transform: scale(.98); }
+
+  .btn-ghost {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    min-height: 34px; min-width: 34px;
+    padding: 6px 10px;
+    font-size: .74rem; font-weight: 600;
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    transition: background-color .15s, transform .12s;
+  }
+  .btn-ghost:active { background: var(--surface-3); transform: scale(.95); }
+  .btn-ghost svg { width: 14px; height: 14px; }
+  .btn-ghost.icon { padding: 0; width: 34px; }
+  .btn-ghost.del { color: var(--danger); border-color: #f3cfcf; background: #fdf3f3; }
+  .btn-ghost.wide { width: 100%; min-height: 44px; }
+
+  .toggle-link {
+    background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: .72rem; font-weight: 600;
+    padding: 7px 11px; border-radius: 99px;
+    cursor: pointer;
+    transition: background-color .15s;
+  }
+  .toggle-link:active { background: var(--surface-3); }
+
+  .collapsible { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
+  .collapsible.open { display: block; animation: drop .28s var(--ease) both; }
+  @keyframes drop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  .alert {
+    background: #fdf1ee;
+    border: 1px solid #f4cdc3;
+    color: #a3301b;
+    font-size: .78rem; font-weight: 600;
+    padding: 10px 12px 10px 34px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    display: none;
+    position: relative;
+  }
+  .alert::before {
+    content: "!"; position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #d9480f; color: #fff;
+    font-size: .66rem; font-weight: 800; display: grid; place-items: center; line-height: 16px; text-align: center;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 34px 18px;
+    color: var(--text-muted);
+    font-size: .84rem;
+    background: var(--surface);
+    border: 1.5px dashed var(--border-strong);
+    border-radius: 18px;
+  }
+  .empty-state strong { color: var(--text); }
+
+  /* ---------- Navigation verre dépoli ---------- */
+  .nav {
+    position: fixed;
+    left: 12px; right: 12px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    max-width: 416px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, .72);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    backdrop-filter: blur(22px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.7);
+    border-radius: 24px;
+    box-shadow: 0 0 0 1px rgba(28,25,20,.06), 0 10px 30px -8px rgba(28,25,20,.25), inset 0 1px 0 rgba(255,255,255,.8);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 6px;
+    gap: 4px;
+    z-index: 20;
+  }
+  .nav button {
+    background: transparent; border: none;
+    color: var(--text-muted);
+    font-size: .66rem; font-weight: 600; letter-spacing: -.005em;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px;
+    min-height: 54px;
+    border-radius: 18px;
+    cursor: pointer;
+    transition: color .2s, background-color .2s, transform .12s var(--ease);
+  }
+  .nav button:active { transform: scale(.93); }
+  .nav button.active { color: var(--text); background: rgba(23,24,27,.07); }
+  .nav button.active svg { stroke-width: 2.2; }
+  .nav svg { width: 21px; height: 21px; transition: transform .25s var(--spring); }
+  .nav button.active svg { transform: translateY(-1px); }
+
+  /* ---------- Modales (bottom sheet) ---------- */
+  .modal-bg {
+    position: fixed; inset: 0;
+    display: flex; align-items: flex-end; justify-content: center;
+    z-index: 50;
+    background: rgba(20, 18, 15, 0);
+    visibility: hidden; pointer-events: none;
+    transition: background-color .3s, visibility 0s linear .38s;
+  }
+  .modal-bg.open {
+    visibility: visible; pointer-events: auto;
+    background: rgba(20, 18, 15, .42);
+    transition: background-color .3s, visibility 0s;
+  }
+  .modal-box {
+    position: relative;
+    background: var(--surface);
+    border-radius: 26px 26px 0 0;
+    width: 100%; max-width: 440px;
+    padding: 26px 16px calc(24px + env(safe-area-inset-bottom));
+    max-height: 88vh; overflow-y: auto; overscroll-behavior: contain;
+    box-shadow: 0 -10px 40px -10px rgba(0,0,0,.3);
+    transform: translateY(105%);
+    transition: transform .42s var(--spring);
+  }
+  .modal-bg.open .modal-box { transform: translateY(0); }
+  .modal-box::before {
+    content: ""; position: absolute; top: 9px; left: 50%; transform: translateX(-50%);
+    width: 38px; height: 5px; border-radius: 99px; background: var(--border-strong);
+  }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .modal-head h3 { font-size: 1.08rem; font-weight: 700; letter-spacing: -.025em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .calc-line {
+    font-family: var(--mono); font-size: .78rem; color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 13px 14px; border-radius: 13px;
+    margin-bottom: 8px; line-height: 1.75;
+  }
+  #aliq-preview { font-family: var(--mono); font-size: .76rem; color: var(--text-dim); margin: 2px 2px 10px; }
+  #del-smp-msg { font-size: .9rem; color: var(--text-dim); margin-bottom: 16px; line-height: 1.5; }
+
+  /* Ajustements de mise en page */
+  .stat-val { white-space: normal; line-height: 1.2; font-size: .86rem; }
+  .card-title { min-width: 0; }
+  .toggle-link { white-space: nowrap; flex-shrink: 0; margin-left: 8px; }
+  .smp-card { flex-wrap: wrap; row-gap: 10px; }
+  .smp-left { flex: 1 1 100%; }
+  .smp-right {
+    flex: 1 1 100%; flex-direction: row; align-items: center; justify-content: space-between;
+    padding: 9px 0 0 36px; border-top: 1px dashed var(--border);
+  }
+  .vol-badge { font-size: .98rem; }
+  /* ===== v10 : analyses, cahier, vigne ===== */
+  .nav { grid-template-columns: repeat(5, 1fr); }
+  .nav button { font-size: .6rem; min-height: 52px; letter-spacing: -.01em; }
+  .seg.sans button { font-family: var(--sans); font-size: .76rem; }
+  .seg.two { grid-template-columns: 1fr 1fr; }
+  .subnav { margin-bottom: 12px; }
+  .tag.vine { background: #fbeef2; color: var(--must); border-color: #f1cfdb; }
+  .smp-vine { font-size: .72rem; color: var(--must); font-weight: 600; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vine-block { background: #fdf7f9; border: 1px solid #f1dbe3; border-radius: 14px; padding: 11px 11px 3px; margin-bottom: 10px; }
+  .vine-block .eyebrow { color: var(--must); }
+  .vine-block .field { background: #fff; }
+
+  .search {
+    display: flex; align-items: center; gap: 9px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 0 13px; margin-bottom: 10px; min-height: 48px;
+    box-shadow: 0 1px 2px rgba(28,25,20,.04);
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .search:focus-within { border-color: var(--ink); box-shadow: 0 0 0 4px rgba(23,24,27,.07); }
+  .search svg { width: 17px; height: 17px; color: var(--text-muted); flex-shrink: 0; }
+  .search input { flex: 1; min-width: 0; border: none; background: transparent; outline: none; font-size: .95rem; color: var(--text); -webkit-appearance: none; }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .kpi {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 13px;
+    padding: 10px 4px 9px; display: flex; flex-direction: column; align-items: center; gap: 1px;
+    cursor: pointer; transition: transform .12s, box-shadow .18s, background-color .18s;
+  }
+  .kpi b { font-family: var(--mono); font-size: 1.25rem; font-weight: 700; color: var(--sc); letter-spacing: -.03em; }
+  .kpi span { font-size: .64rem; font-weight: 600; color: var(--text-muted); }
+  .kpi.active { background: var(--surface); border-color: var(--sc); box-shadow: 0 0 0 1px var(--sc); }
+  .kpi:active { transform: scale(.95); }
+
+  .rec {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 17px;
+    padding: 13px 14px 12px; margin-bottom: 8px; cursor: pointer;
+    box-shadow: 0 1px 2px rgba(28,25,20,.04); transition: transform .12s var(--ease);
+  }
+  .rec:active { transform: scale(.99); }
+  .rec-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .rec-code { font-family: var(--mono); font-size: .76rem; font-weight: 700; color: var(--text-dim); }
+  .rec-pos { background: var(--surface-3); border-radius: 5px; padding: 1px 5px; margin-left: 3px; }
+  .rec-title { font-size: .96rem; font-weight: 600; letter-spacing: -.01em; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rec-meta { font-size: .72rem; color: var(--text-muted); margin-top: 7px; }
+  .rec-vine { font-size: .72rem; color: var(--must); font-weight: 600; margin-top: 3px; }
+  .rec-note { font-size: .76rem; color: var(--text-dim); margin-top: 7px; padding: 7px 10px; background: var(--surface-2); border-radius: 9px; border-left: 2.5px solid var(--border-strong); }
+  .status-pill {
+    flex-shrink: 0; min-height: 46px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 1px;
+    background: var(--sc); color: #fff; border: none; border-radius: 12px; padding: 7px 12px;
+    font-size: .8rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 6px 14px -8px var(--sc); transition: transform .12s;
+  }
+  .status-pill span { font-size: .6rem; font-weight: 600; opacity: .82; }
+  .status-pill:active { transform: scale(.94); }
+  .status-track { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 11px; }
+  .status-track i { height: 4px; border-radius: 99px; background: var(--surface-3); transition: background-color .3s; }
+  .status-track i.on { background: var(--sc); }
+
+  .day-label { font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--text-muted); padding: 16px 0 4px; }
+  .day-label:first-child { padding-top: 8px; }
+  .entry { display: flex; gap: 11px; padding: 11px 0; border-top: 1px solid var(--surface-3); }
+  .day-label + .entry { border-top: none; }
+  .entry-ic { width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0; display: grid; place-items: center; font-size: .82rem; font-weight: 800; color: var(--ec); background: color-mix(in srgb, var(--ec) 11%, #fff); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ec) 18%, transparent); }
+  .entry-body { flex: 1; min-width: 0; }
+  .entry-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .entry-type { font-size: .64rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ec); }
+  .entry-time { font-family: var(--mono); font-size: .66rem; color: var(--text-muted); white-space: nowrap; }
+  .entry-text { font-size: .85rem; margin-top: 2px; white-space: pre-wrap; word-break: break-word; line-height: 1.45; }
+  .entry.manual .entry-text { font-weight: 500; }
+  .entry-smp { font-size: .7rem; color: var(--must); font-weight: 600; margin-top: 3px; }
+  .entry-del { background: none; border: none; color: var(--text-muted); width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; cursor: pointer; font-size: .8rem; }
+  .entry-del:active { background: var(--surface-3); }
+  .more-note { text-align: center; font-size: .72rem; color: var(--text-muted); padding: 12px 0 6px; }
+  .card-head { gap: 10px; }
+  .today { white-space: nowrap; font-family: var(--mono); font-size: .66rem; font-weight: 600; color: var(--text-muted); }
+
+  .field textarea { width: 100%; border: none; background: transparent; outline: none; resize: vertical; min-height: 78px; font-family: var(--sans); font-size: .96rem; line-height: 1.45; color: var(--text); }
+  .snips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 9px -2px 2px; padding: 2px; }
+  .snips::-webkit-scrollbar { display: none; }
+  .snips button { white-space: nowrap; background: var(--surface-2); border: 1px dashed var(--border-strong); border-radius: 99px; padding: 8px 12px; font-size: .72rem; font-weight: 600; color: var(--text-dim); cursor: pointer; }
+  .snips button:active { background: var(--surface-3); }
+  .chk-line { display: flex; align-items: center; gap: 10px; font-size: .8rem; color: var(--text-dim); margin-top: 8px; min-height: 38px; cursor: pointer; }
+  .chk-line input { width: 20px; height: 20px; accent-color: var(--accent); flex-shrink: 0; }
+
+  .backup-info { font-size: .78rem; color: var(--text-dim); }
+  .backup-info.warn { color: #a3301b; font-weight: 600; }
+  .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .btn-grid .btn-ghost { min-height: 46px; font-size: .78rem; }
+
+  .hist-line { display: flex; justify-content: space-between; gap: 8px; font-size: .78rem; padding: 8px 0; border-bottom: 1px solid var(--surface-3); }
+  .hist-line .mono { font-family: var(--mono); font-weight: 700; }
+  .hist-st { font-weight: 700; }
+  .hist-j { margin-top: 8px; font-size: .74rem; color: var(--text-dim); display: grid; gap: 6px; max-height: 170px; overflow: auto; }
+  .hist-j b { font-family: var(--mono); font-weight: 600; color: var(--text-muted); margin-right: 4px; }
+  .hist-empty { font-size: .76rem; color: var(--text-muted); padding: 4px 0; }
+  .tm-info { font-family: var(--mono); font-size: .74rem; line-height: 1.7; background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; color: var(--text-dim); }
+
+  .toast {
+    position: fixed; left: 16px; right: 16px; max-width: 408px; margin: 0 auto;
+    bottom: calc(92px + env(safe-area-inset-bottom));
+    background: var(--ink); color: #fff; border-radius: 15px;
+    padding: 11px 11px 11px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    font-size: .85rem; font-weight: 500; z-index: 60;
+    box-shadow: 0 14px 34px -12px rgba(0,0,0,.55);
+    transform: translateY(24px); opacity: 0; pointer-events: none;
+    transition: transform .4s var(--spring), opacity .25s;
+  }
+  .toast.show { transform: none; opacity: 1; pointer-events: auto; }
+  .toast button { background: rgba(255,255,255,.15); color: #fff; border: none; border-radius: 10px; padding: 9px 13px; font-weight: 700; font-size: .78rem; cursor: pointer; flex-shrink: 0; }
+
+  @media print {
+    body { background: #fff !important; padding: 0 !important; max-width: none; }
+    .nav, .toast, .modal-bg, .composer, .search, .exp-bar, .btn-main, .toggle-link, .btn-ghost, .entry-del, .subnav, .settings-card, .status-pill { display: none !important; }
+    .card { box-shadow: none !important; border: none !important; }
+    .entry, .rec { break-inside: avoid; }
+    .view.active { animation: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand-wrap">
+    <span class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3h6M10 3v14.5a2 2 0 1 0 4 0V3"/><path d="M10 12h4" opacity=".55"/></svg>
+    </span>
+    <div><span class="brand">RMN Bench</span><span class="brand-sub" id="brand-sub">PAILLASSE</span></div>
+  </div>
+  <span class="pill-badge" id="top-counter">0 tube</span>
+</header>
+
+<!-- ==================== 1. TUBE RMN ==================== -->
+<div id="v-tube" class="view active">
+  <div class="card">
+    <span class="eyebrow">Échantillon actif</span>
+    <select class="select-clean" id="tube-sample-select" onchange="selectSampleFromTube(this.value)"></select>
+    <div class="meta-row">
+      <div id="asb-tags"></div>
+      <span class="remain">Reste <strong id="asb-vol-ml">0.0 mL</strong></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="visual-hero">
+      <div class="hero-figure">
+        <svg class="tube-svg" width="60" height="160" viewBox="0 0 36 96">
+          <defs>
+            <linearGradient id="gGlass" x1="0" x2="1">
+              <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+              <stop offset=".45" stop-color="#f3f5f7" stop-opacity=".55"/>
+              <stop offset="1" stop-color="#dfe3e8" stop-opacity=".95"/>
+            </linearGradient>
+            <linearGradient id="gMust" x1="0" x2="1">
+              <stop offset="0" stop-color="#7c1638"/><stop offset=".35" stop-color="#b42d59"/><stop offset="1" stop-color="#6e1231"/>
+            </linearGradient>
+            <linearGradient id="gBuf" x1="0" x2="1">
+              <stop offset="0" stop-color="#5333bd"/><stop offset=".35" stop-color="#8669ea"/><stop offset="1" stop-color="#4a2ca9"/>
+            </linearGradient>
+            <linearGradient id="gD2o" x1="0" x2="1">
+              <stop offset="0" stop-color="#086a7c"/><stop offset=".35" stop-color="#1aa0b8"/><stop offset="1" stop-color="#065c6b"/>
+            </linearGradient>
+            <linearGradient id="gCap" x1="0" x2="1">
+              <stop offset="0" stop-color="#2a2c31"/><stop offset=".4" stop-color="#5a5e67"/><stop offset="1" stop-color="#1b1c20"/>
+            </linearGradient>
+            <clipPath id="tubeClip"><path d="M13.7 8 L13.7 86 A4.3 4.3 0 0 0 22.3 86 L22.3 8 Z"/></clipPath>
+          </defs>
+          <!-- graduations -->
+          <g font-family="JetBrains Mono, monospace" font-size="3.1" font-weight="600" fill="#8a8c93" text-anchor="start">
+            <g stroke="#b5b2aa" stroke-width=".45">
+              <line x1="24.2" y1="14" x2="27" y2="14"/><line x1="24.2" y1="26" x2="25.6" y2="26"/>
+              <line x1="24.2" y1="38" x2="27" y2="38"/><line x1="24.2" y1="50" x2="25.6" y2="50"/>
+              <line x1="24.2" y1="62" x2="27" y2="62"/><line x1="24.2" y1="74" x2="25.6" y2="74"/>
+            </g>
+            <text x="27.8" y="15.1">600</text><text x="27.8" y="39.1">400</text><text x="27.8" y="63.1">200</text>
+          </g>
+          <!-- capuchon -->
+          <rect x="10.5" y="1" width="15" height="7.6" rx="1.8" fill="url(#gCap)"/>
+          <rect x="10.5" y="6.4" width="15" height="1.2" fill="#000" opacity=".28"/>
+          <rect x="12" y="2" width="1.4" height="4.2" rx=".7" fill="#fff" opacity=".22"/>
+          <!-- verre (fond) -->
+          <path d="M13 8 L13 86 A5 5 0 0 0 23 86 L23 8 Z" fill="url(#gGlass)"/>
+          <!-- liquides -->
+          <g clip-path="url(#tubeClip)" class="liquid">
+            <rect id="tube-svg-bottom" x="13" y="85.9" width="10" height="6" fill="url(#gD2o)"/>
+            <rect id="tube-svg-d2o" x="13" y="77" width="10" height="9" fill="url(#gD2o)"/>
+            <rect id="tube-svg-buf" x="13" y="62" width="10" height="15" fill="url(#gBuf)"/>
+            <rect id="tube-svg-must" x="13" y="14" width="10" height="48" fill="url(#gMust)"/>
+            <!-- ménisque concave -->
+            <path d="M13 12.7 Q18 15.7 23 12.7 L23 14.4 L13 14.4 Z" fill="url(#gMust)"/>
+            <path d="M13.7 13.1 Q18 15.6 22.3 13.1" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width=".5"/>
+          </g>
+          <!-- contour + reflets -->
+          <path d="M13 8 L13 86 A5 5 0 0 0 23 86 L23 8" fill="none" stroke="#8f949c" stroke-width=".8"/>
+          <rect x="14.5" y="9.5" width="1.5" height="76" rx=".75" fill="#fff" opacity=".6"/>
+          <rect x="20.9" y="11" width=".55" height="72" rx=".3" fill="#fff" opacity=".35"/>
+          <ellipse cx="18" cy="8.2" rx="5" ry=".7" fill="none" stroke="#8f949c" stroke-width=".5"/>
+        </svg>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-tile"><span class="stat-lbl"><i style="background:var(--ink)"></i>Tube 5 mm</span><span class="stat-val">600 µL</span></div>
+        <div class="stat-tile"><span class="stat-lbl"><i style="background:var(--must)"></i>Moût pur</span><span class="stat-val" id="hero-must" style="color:var(--must)">420 µL</span></div>
+        <div class="stat-tile"><span class="stat-lbl"><i style="background:var(--buf)"></i><span id="hero-buf-lbl">Phosphate</span></span><span class="stat-val" id="hero-buf" style="color:var(--buf)">150 mM</span></div>
+        <div class="stat-tile"><span class="stat-lbl"><i style="background:linear-gradient(90deg,var(--dss) 50%,var(--nan3) 50%)"></i>DSS · NaN₃</span><span class="stat-val" id="hero-add">1 · 1 mM</span></div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--must)"></i>Moût</span>
+      <span><i class="dot" style="background:var(--buf)"></i>Tampon</span>
+      <span><i class="dot" style="background:var(--d2o)"></i>D₂O</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Pipetage</span>
+      <button class="toggle-link" onclick="toggleBlock('tube-settings', this)">Ajuster ▾</button>
+    </div>
+
+    <div id="tube-warn" class="alert"></div>
+    <div id="tube-steps"></div>
+
+    <div id="tube-settings" class="collapsible">
+      <div class="grid-2" style="margin-bottom:8px;">
+        <div class="field"><label id="lbl-tube-buf-in">Tampon final (mM)</label><input type="text" inputmode="decimal" id="finPhos" value="150" oninput="syncFromTube()"></div>
+        <div class="field"><label>Facteur (X)</label><input type="text" inputmode="decimal" id="bufFactor" value="5" oninput="syncFromTube()"></div>
+      </div>
+      <div class="grid-3" style="margin-bottom:10px;">
+        <div class="field"><label>DSS final (mM)</label><input type="text" inputmode="decimal" id="finDss" value="1.0" oninput="syncFromTube()"></div>
+        <div class="field"><label>NaN₃ final (mM)</label><input type="text" inputmode="decimal" id="finNan3" value="1.0" oninput="syncFromTube()"></div>
+        <div class="field"><label>D₂O tube (%)</label><input type="text" inputmode="decimal" id="tubeD2oPctIn" value="10" oninput="syncFromTube()"></div>
+      </div>
+      <button class="btn-ghost wide" onclick="openMath('tube')">ƒ(x)&nbsp; Formules</button>
+    </div>
+
+    <div class="grid-2" style="margin-top:12px;">
+      <div class="field"><label>Expérience RMN</label><select class="txt" id="tube-nmr-exp" onchange="db.params.nmrExp=this.value;save()"></select></div>
+      <div class="field"><label>pH mesuré (option)</label><input type="text" inputmode="decimal" id="tube-ph" placeholder="—"></div>
+    </div>
+    <div class="field" style="margin-top:8px;"><label>Remarque → cahier (option)</label><input type="text" class="txt" id="tube-note" placeholder="ex. léger trouble, recentrifugé"></div>
+    <button class="btn-main" id="btn-tube-done" onclick="finishTube()">Valider ce tube RMN</button>
+  </div>
+</div>
+
+<!-- ==================== 2. ÉCHANTILLONS ==================== -->
+<div id="v-samples" class="view">
+  <div class="card">
+    <div class="card-head" style="margin-bottom:0;">
+      <span class="card-title">Échantillons (<span id="stat-smp-count">0</span>) · <span id="stat-smp-vol">0 mL</span></span>
+      <button class="btn-ghost" onclick="toggleBlock('new-smp-box', this)">+ Nouveau</button>
+    </div>
+
+    <div id="new-smp-box" class="collapsible">
+      <div class="grid-2" style="margin-bottom:8px;">
+        <div class="field"><label>Nom</label><input type="text" class="txt" id="new-smp-name" placeholder="Moût-2026-A"></div>
+        <div class="field"><label>Volume (mL)</label><input type="text" inputmode="decimal" id="new-smp-vol" value="500"></div>
+      </div>
+      <div class="field" style="margin-bottom:8px;">
+        <label>Expérience</label>
+        <input type="text" class="txt" id="new-smp-exp" list="exp-presets" placeholder="ex. RMN à 24h">
+      </div>
+      <div class="grid-2" style="margin-bottom:8px;">
+        <div class="field"><label>Stockage</label><input type="text" class="txt" id="new-smp-loc" list="loc-presets" placeholder="Congélateur -80°C"></div>
+        <div class="field"><label>Traitement</label><input type="text" class="txt" id="new-smp-treat" list="treat-presets" placeholder="Brut"></div>
+      </div>
+      <div class="vine-block">
+        <span class="eyebrow">Métadonnées vigne</span>
+        <div class="grid-2" style="margin-bottom:8px;">
+          <div class="field"><label>Cépage</label><input type="text" class="txt" id="new-smp-cultivar" list="cultivar-presets" placeholder="Cabernet Sauvignon"></div>
+          <div class="field"><label>Parcelle / bloc</label><input type="text" class="txt" id="new-smp-plot" placeholder="P12 · rang 4"></div>
+        </div>
+        <div class="grid-3" style="margin-bottom:8px;">
+          <div class="field"><label>Millésime</label><input type="text" inputmode="numeric" id="new-smp-vintage" placeholder="2026"></div>
+          <div class="field"><label>Réplicat</label><input type="text" class="txt" id="new-smp-rep" placeholder="R1"></div>
+          <div class="field"><label>Matrice</label><input type="text" class="txt" id="new-smp-matrix" list="matrix-presets" placeholder="Baie"></div>
+        </div>
+        <div class="field" style="margin-bottom:8px;"><label>Stade phénologique (BBCH)</label><input type="text" class="txt" id="new-smp-stage" list="stage-presets" placeholder="BBCH 85 · Fin véraison"></div>
+      </div>
+      <button class="btn-main" style="margin-top:4px;" onclick="addNewSample()">Créer l'échantillon</button>
+    </div>
+  </div>
+
+  <div class="search"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5L17 17"/></svg><input type="search" id="smp-search" placeholder="Nom, cépage, parcelle, stade…" oninput="window._smpQuery=this.value;renderSamplesPage()"></div>
+  <div class="exp-bar" id="exp-filter-bar"></div>
+  <div id="samples-list"></div>
+</div>
+
+<!-- ==================== 3. TAMPON ==================== -->
+<div id="v-5x" class="view">
+  <div class="seg sans two subnav"><button class="active">Tampon nX</button><button onclick="haptic();go('mothers')">Réactifs</button></div>
+  <div class="card">
+    <div class="visual-hero">
+      <div class="hero-figure">
+        <svg class="bottle-svg" width="62" height="136" viewBox="0 0 42 92">
+          <defs>
+            <linearGradient id="gBottle" x1="0" x2="1">
+              <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+              <stop offset=".5" stop-color="#f2f4f6" stop-opacity=".5"/>
+              <stop offset="1" stop-color="#dde1e6" stop-opacity=".95"/>
+            </linearGradient>
+            <linearGradient id="gCapBlue" x1="0" x2="1">
+              <stop offset="0" stop-color="#11479e"/><stop offset=".4" stop-color="#2f7ae6"/><stop offset="1" stop-color="#0d3a82"/>
+            </linearGradient>
+            <linearGradient id="gBufBody" x1="0" x2="1">
+              <stop offset="0" stop-color="#6741d9" stop-opacity=".42"/><stop offset=".4" stop-color="#8b70ec" stop-opacity=".26"/><stop offset="1" stop-color="#5333bd" stop-opacity=".45"/>
+            </linearGradient>
+            <clipPath id="bottleClip"><path d="M6.8 27 Q6.8 21 14 19.4 L28 19.4 Q35.2 21 35.2 27 L35.2 80 Q35.2 82.6 32.6 82.6 L9.4 82.6 Q6.8 82.6 6.8 80 Z"/></clipPath>
+          </defs>
+          <!-- bouchon GL45 -->
+          <rect x="11" y="1" width="20" height="10" rx="2" fill="url(#gCapBlue)"/>
+          <g stroke="#0a2f6b" stroke-width=".5" opacity=".55">
+            <line x1="14" y1="2.5" x2="14" y2="9.5"/><line x1="17" y1="2.5" x2="17" y2="9.5"/><line x1="20" y1="2.5" x2="20" y2="9.5"/>
+            <line x1="23" y1="2.5" x2="23" y2="9.5"/><line x1="26" y1="2.5" x2="26" y2="9.5"/><line x1="29" y1="2.5" x2="29" y2="9.5"/>
+          </g>
+          <!-- col + corps -->
+          <path d="M13.5 11 L13.5 17.5 Q6 19.6 6 27 L6 80 Q6 83.5 9.5 83.5 L32.5 83.5 Q36 83.5 36 80 L36 27 Q36 19.6 28.5 17.5 L28.5 11 Z" fill="url(#gBottle)"/>
+          <g clip-path="url(#bottleClip)" class="liquid">
+            <rect x="5" y="38" width="32" height="48" fill="url(#gBufBody)"/>
+            <rect id="b5x-svg-d2o" x="5" y="38" width="32" height="0" fill="#0b7f95" opacity=".42"/>
+            <rect x="5" y="32" width="32" height="6" fill="#2b8a3e" opacity=".38"/>
+            <rect x="5" y="26" width="32" height="6" fill="#d9480f" opacity=".32"/>
+            <path d="M5 25 Q21 28 37 25 L37 26.6 L5 26.6 Z" fill="#d9480f" opacity=".32"/>
+            <path d="M6.8 25.3 Q21 27.9 35.2 25.3" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width=".55"/>
+          </g>
+          <!-- graduations -->
+          <g stroke="#7d828b" stroke-width=".45" opacity=".8">
+            <line x1="29" y1="38" x2="33" y2="38"/><line x1="31" y1="44" x2="33" y2="44"/>
+            <line x1="29" y1="50" x2="33" y2="50"/><line x1="31" y1="56" x2="33" y2="56"/>
+            <line x1="29" y1="62" x2="33" y2="62"/><line x1="31" y1="68" x2="33" y2="68"/>
+            <line x1="29" y1="74" x2="33" y2="74"/>
+          </g>
+          <!-- contour + reflets -->
+          <path d="M13.5 11 L13.5 17.5 Q6 19.6 6 27 L6 80 Q6 83.5 9.5 83.5 L32.5 83.5 Q36 83.5 36 80 L36 27 Q36 19.6 28.5 17.5 L28.5 11" fill="none" stroke="#8f949c" stroke-width=".8"/>
+          <rect x="8.6" y="28" width="2" height="50" rx="1" fill="#fff" opacity=".6"/>
+          <rect x="15" y="12" width="1.2" height="5" rx=".6" fill="#fff" opacity=".55"/>
+        </svg>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-tile"><span class="stat-lbl"><i style="background:var(--phos)"></i><span id="lbl-b-phos">Phosphate 5X</span></span><span class="stat-val" style="color:var(--phos);" id="val-b-phos">750 mM</span></div>
+        <div class="stat-tile"><span class="stat-lbl"><i style="background:var(--buf)"></i>Stock actuel</span><span class="stat-val" style="color:var(--buf);" id="val-b-stock">10.0 mL</span></div>
+        <div class="stat-tile"><span class="stat-lbl"><i style="background:var(--dss)"></i><span id="lbl-b-dss">DSS 5X</span></span><span class="stat-val" style="color:var(--dss);" id="val-b-dss">5.0 mM</span></div>
+        <div class="stat-tile"><span class="stat-lbl"><i style="background:var(--nan3)"></i><span id="lbl-b-nan3">NaN₃ 5X</span></span><span class="stat-val" style="color:var(--nan3);" id="val-b-nan3">5.0 mM</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title" id="buf-card-title">Préparation Tampon 5X</span>
+      <button class="toggle-link" onclick="toggleBlock('buf-adv', this)">Conc. ▾</button>
+    </div>
+
+    <div class="seg" id="factorPills">
+      <button onclick="setFactor(2)">2X</button>
+      <button onclick="setFactor(4)">4X</button>
+      <button class="active" onclick="setFactor(5)">5X</button>
+      <button onclick="setFactor(10)">10X</button>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:10px;">
+      <div class="field"><label>Volume (mL)</label><input type="text" inputmode="decimal" id="vol5x" value="10" oninput="calc5X()"></div>
+      <div class="field"><label>D₂O tampon (%)</label><input type="text" inputmode="decimal" id="bufD2oPctIn" value="0" oninput="syncFromBufConc()"></div>
+      <div class="field"><label>Stock (mL)</label><input type="text" inputmode="decimal" id="stock5xDirect" value="10" oninput="setStockDirect('b5x', this.value)"></div>
+    </div>
+
+    <div id="buf-adv" class="collapsible" style="margin-bottom:10px;">
+      <div class="grid-3" style="margin-bottom:8px;">
+        <div class="field"><label id="in-lbl-phos">Tampon (mM)</label><input type="text" inputmode="decimal" id="stockPhosIn" value="750" oninput="syncFromBufConc()"></div>
+        <div class="field"><label id="in-lbl-dss">DSS (mM)</label><input type="text" inputmode="decimal" id="stockDssIn" value="5" oninput="syncFromBufConc()"></div>
+        <div class="field"><label id="in-lbl-nan3">NaN₃ (mM)</label><input type="text" inputmode="decimal" id="stockNan3In" value="5" oninput="syncFromBufConc()"></div>
+      </div>
+      <div class="field" style="margin-bottom:10px;"><label>Preset rapide D₂O dans tampon</label>
+        <select class="txt" id="bufD2oPreset" onchange="document.getElementById('bufD2oPctIn').value=this.value;syncFromBufConc()">
+          <option value="0">0 % (H₂O pur)</option>
+          <option value="50">50 % D₂O (standard 5X → 10% tube)</option>
+          <option value="100">100 % D₂O</option>
+        </select>
+      </div>
+      <button class="btn-ghost wide" onclick="openMath('5x')">ƒ(x)&nbsp; Formules</button>
+    </div>
+
+    <div id="buf-warn" class="alert"></div>
+    <div id="steps-5x"></div>
+
+    <button class="btn-main" id="btn-5x-done" onclick="finish5X()">Valider & déduire des mères</button>
+  </div>
+</div>
+
+<!-- ==================== 4. RÉACTIFS ==================== -->
+<div id="v-mothers" class="view">
+  <div class="seg sans two subnav"><button onclick="haptic();go('5x')">Tampon nX</button><button class="active">Réactifs</button></div>
+  <span class="eyebrow" style="margin-left:4px;">Stocks · flacons</span>
+  <div class="vial-grid" id="flacon-grid"></div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title" id="prep-title">Solution mère</span>
+      <button class="toggle-link" onclick="openMath('mothers')">ƒ(x)</button>
+    </div>
+    <div id="prep-body"></div>
+  </div>
+</div>
+
+<!-- ==================== 5. ANALYSES ==================== -->
+<div id="v-analyses" class="view">
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Tubes RMN (<span id="tube-total">0</span>)</span>
+      <button class="btn-ghost" onclick="exportTubesCsv()">⤓ Feuille CSV</button>
+    </div>
+    <div class="kpi-row" id="tube-kpis"></div>
+  </div>
+  <div class="search"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5L17 17"/></svg><input type="search" id="tube-search" placeholder="Code, échantillon, cépage, expérience…" oninput="window._tubeQuery=this.value;renderAnalyses()"></div>
+  <div id="tubes-list"></div>
+</div>
+
+<!-- ==================== 6. CAHIER DE LABO ==================== -->
+<div id="v-journal" class="view">
+  <div class="card composer">
+    <div class="card-head">
+      <span class="card-title">Cahier de labo</span>
+      <span class="today" id="journal-today"></span>
+    </div>
+    <div class="seg sans" id="note-types">
+      <button class="active" onclick="setNoteType('note', this)">Note</button>
+      <button onclick="setNoteType('obs', this)">Observ.</button>
+      <button onclick="setNoteType('issue', this)">Problème</button>
+      <button onclick="setNoteType('protocol', this)">Protocole</button>
+    </div>
+    <div class="field"><label>Entrée</label><textarea id="note-text" rows="3" placeholder="Observation, déviation, paramètre d'acquisition…"></textarea></div>
+    <div class="snips" id="note-snips"></div>
+    <label class="chk-line"><input type="checkbox" id="note-link" checked><span id="note-link-lbl">Lier à l'échantillon actif</span></label>
+    <button class="btn-main" style="margin-top:8px;" onclick="addNote()">Ajouter au cahier</button>
+  </div>
+
+  <div class="exp-bar" id="journal-filters"></div>
+  <div class="search"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5L17 17"/></svg><input type="search" id="journal-search" placeholder="Rechercher dans le cahier…" oninput="window._jQuery=this.value;renderJournal()"></div>
+  <div class="card" style="padding:4px 16px 10px;"><div id="journal-list"></div></div>
+
+  <div class="card settings-card">
+    <div class="card-head">
+      <span class="card-title">Paramètres & sauvegarde</span>
+      <button class="toggle-link" onclick="toggleBlock('settings-box', this)">Ouvrir ▾</button>
+    </div>
+    <div id="backup-info" class="backup-info"></div>
+    <div id="settings-box" class="collapsible">
+      <div class="grid-2" style="margin-bottom:8px;">
+        <div class="field"><label>Opérateur·rice</label><input type="text" class="txt" id="set-operator" placeholder="Initiales" oninput="updateSetting('operator', this.value)"></div>
+        <div class="field"><label>Projet</label><input type="text" class="txt" id="set-project" placeholder="Métabolomique vigne" oninput="updateSetting('project', this.value)"></div>
+      </div>
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div class="field"><label>Spectromètre</label><input type="text" class="txt" id="set-spectro" placeholder="600 MHz · cryosonde" oninput="updateSetting('spectro', this.value)"></div>
+        <div class="field"><label>Température (K)</label><input type="text" inputmode="decimal" id="set-temp" placeholder="300" oninput="updateSetting('tempK', this.value)"></div>
+      </div>
+      <span class="eyebrow">Sauvegarde & exports</span>
+      <div class="btn-grid">
+        <button class="btn-ghost" onclick="exportJson()">⤓ Sauvegarde (.json)</button>
+        <button class="btn-ghost" onclick="document.getElementById('import-file').click()">⤒ Restaurer (.json)</button>
+        <button class="btn-ghost" onclick="exportSamplesCsv()">Échantillons (.csv)</button>
+        <button class="btn-ghost" onclick="exportTubesCsv()">Tubes RMN (.csv)</button>
+        <button class="btn-ghost" onclick="exportJournalMd()">Cahier (.md)</button>
+        <button class="btn-ghost" onclick="window.print()">Imprimer / PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<datalist id="exp-presets">
+  <option value="RMN T0">
+  <option value="RMN à 24h">
+  <option value="RMN à 48h">
+  <option value="Stabilité 4°C">
+  <option value="Contrôle maturité">
+</datalist>
+<datalist id="loc-presets">
+  <option value="Congélateur -80°C">
+  <option value="Congélateur -20°C">
+  <option value="Chambre froide 4°C">
+  <option value="Paillasse 20°C">
+</datalist>
+<datalist id="treat-presets">
+  <option value="Brut">
+  <option value="Centrifugé 10 000g">
+  <option value="Filtré 0.45 µm">
+  <option value="Filtré 0.22 µm">
+</datalist>
+
+<datalist id="cultivar-presets">
+  <option value="Cabernet Sauvignon"><option value="Merlot"><option value="Cabernet franc"><option value="Pinot noir">
+  <option value="Syrah"><option value="Grenache"><option value="Chardonnay"><option value="Sauvignon blanc">
+  <option value="Sémillon"><option value="Ugni blanc"><option value="Riesling"><option value="Chenin blanc">
+</datalist>
+<datalist id="stage-presets">
+  <option value="BBCH 71 · Nouaison"><option value="BBCH 75 · Petit pois"><option value="BBCH 77 · Fermeture grappe">
+  <option value="BBCH 81 · Début véraison"><option value="BBCH 83 · Mi-véraison"><option value="BBCH 85 · Fin véraison">
+  <option value="BBCH 89 · Maturité"><option value="Surmaturité">
+</datalist>
+<datalist id="matrix-presets">
+  <option value="Baie entière"><option value="Pellicule"><option value="Pulpe"><option value="Pépins"><option value="Moût">
+  <option value="Feuille"><option value="Sarment"><option value="Racine"><option value="Sève"><option value="Vin">
+</datalist>
+
+<nav class="nav">
+  <button class="active" data-views="tube" onclick="haptic();go('tube', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 3h6M10 3v15a2 2 0 1 0 4 0V3M10 12h4"/></svg>
+    <span>Tube</span>
+  </button>
+  <button data-views="samples" onclick="haptic();go('samples', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 4h5M6 4v12l1.5 4L9 16V4M14 4h5M15 4v12l1.5 4L18 16V4"/><path d="M6 11h3M15 9h3" opacity=".6"/></svg>
+    <span>Échantillons</span>
+  </button>
+  <button data-views="analyses" onclick="haptic();go('analyses', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M3.5 17.5h2l1.2-3 1.3 3h1.5l1.5-12 1.5 12h1.4l1-5 1 5h1.6l.8-2 .8 2h1.4"/></svg>
+    <span>Analyses</span>
+  </button>
+  <button data-views="5x mothers" onclick="haptic();go(window._lastSol || '5x', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="8" y="2.5" width="8" height="3.5" rx="1"/><path d="M9 6v1.6C6.5 8.4 5.5 9.8 5.5 12v7.5A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V12c0-2.2-1-3.6-3.5-4.4V6"/><path d="M5.5 14h13" opacity=".6"/></svg>
+    <span>Solutions</span>
+  </button>
+  <button data-views="journal" onclick="haptic();go('journal', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19"/><path d="M9 7.5h6M9 11h4" opacity=".7"/></svg>
+    <span>Cahier</span>
+  </button>
+</nav>
+
+<!-- Modales -->
+<div class="modal-bg" id="mathModal" onclick="if(event.target===this) closeModal('mathModal')">
+  <div class="modal-box">
+    <div class="modal-head"><h3 id="mathTitle">Calculs</h3><button class="btn-ghost" onclick="closeModal('mathModal')">Fermer</button></div>
+    <div id="mathBody"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="aliquotModal" onclick="if(event.target===this) closeModal('aliquotModal')">
+  <div class="modal-box">
+    <div class="modal-head"><h3 id="aliqTitle">Aliquoter</h3><button class="btn-ghost" onclick="closeModal('aliquotModal')">Fermer</button></div>
+    <div class="grid-2" style="margin-bottom:8px;">
+      <div class="field"><label>Volume / aliquote (mL)</label><input type="text" inputmode="decimal" id="aliq-vol" value="50" oninput="updateAliqPreview()"></div>
+      <div class="field"><label>Nombre</label><input type="text" inputmode="numeric" id="aliq-qty" value="1" oninput="updateAliqPreview()"></div>
+    </div>
+    <div class="field" style="margin-bottom:8px;">
+      <label>Expérience</label>
+      <input type="text" class="txt" id="aliq-exp" list="exp-presets" placeholder="ex. RMN à 24h">
+    </div>
+    <div class="grid-2" style="margin-bottom:8px;">
+      <div class="field"><label>Stockage</label><input type="text" class="txt" id="aliq-loc" list="loc-presets" placeholder="Chambre froide 4°C"></div>
+      <div class="field"><label>Traitement</label><input type="text" class="txt" id="aliq-treat" list="treat-presets" placeholder="Brut"></div>
+    </div>
+    <div id="aliq-preview"></div>
+    <div id="aliq-warn" class="alert"></div>
+    <button class="btn-main" style="margin-top:4px;" onclick="confirmAliquot()">Créer les aliquotes</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="editSampleModal" onclick="if(event.target===this) closeModal('editSampleModal')">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Modifier</h3><button class="btn-ghost" onclick="closeModal('editSampleModal')">Fermer</button></div>
+    <input type="hidden" id="edit-smp-id">
+    <div class="field" style="margin-bottom:8px;"><label>Nom</label><input type="text" class="txt" id="edit-smp-name"></div>
+    <div class="grid-2" style="margin-bottom:8px;">
+      <div class="field"><label>Volume actuel (mL)</label><input type="text" inputmode="decimal" id="edit-smp-vol"></div>
+      <div class="field"><label>Capacité flacon (mL)</label><input type="text" inputmode="decimal" id="edit-smp-cap"></div>
+    </div>
+    <div class="field" style="margin-bottom:8px;">
+      <label>Expérience</label>
+      <input type="text" class="txt" id="edit-smp-exp" list="exp-presets" placeholder="ex. RMN à 24h">
+    </div>
+    <div class="grid-2" style="margin-bottom:8px;">
+      <div class="field"><label>Stockage</label><input type="text" class="txt" id="edit-smp-loc" list="loc-presets"></div>
+      <div class="field"><label>Traitement</label><input type="text" class="txt" id="edit-smp-treat" list="treat-presets"></div>
+    </div>
+      <div class="vine-block">
+        <span class="eyebrow">Métadonnées vigne</span>
+        <div class="grid-2" style="margin-bottom:8px;">
+          <div class="field"><label>Cépage</label><input type="text" class="txt" id="edit-smp-cultivar" list="cultivar-presets" placeholder="Cabernet Sauvignon"></div>
+          <div class="field"><label>Parcelle / bloc</label><input type="text" class="txt" id="edit-smp-plot" placeholder="P12 · rang 4"></div>
+        </div>
+        <div class="grid-3" style="margin-bottom:8px;">
+          <div class="field"><label>Millésime</label><input type="text" inputmode="numeric" id="edit-smp-vintage" placeholder="2026"></div>
+          <div class="field"><label>Réplicat</label><input type="text" class="txt" id="edit-smp-rep" placeholder="R1"></div>
+          <div class="field"><label>Matrice</label><input type="text" class="txt" id="edit-smp-matrix" list="matrix-presets" placeholder="Baie"></div>
+        </div>
+        <div class="field" style="margin-bottom:8px;"><label>Stade phénologique (BBCH)</label><input type="text" class="txt" id="edit-smp-stage" list="stage-presets" placeholder="BBCH 85 · Fin véraison"></div>
+      </div>
+    <button class="btn-main" style="margin-top:4px;" onclick="saveSampleEdit()">Enregistrer</button>
+    <div id="edit-smp-history" style="margin-top:16px;"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="deleteSampleModal" onclick="if(event.target===this) closeModal('deleteSampleModal')">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Supprimer l'échantillon</h3><button class="btn-ghost" onclick="closeModal('deleteSampleModal')">Fermer</button></div>
+    <p id="del-smp-msg"></p>
+    <div class="grid-2">
+      <button class="btn-ghost" style="min-height:50px;font-size:.9rem;" onclick="closeModal('deleteSampleModal')">Annuler</button>
+      <button class="btn-danger" onclick="confirmDeleteSample()">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="tubeModal" onclick="if(event.target===this) closeModal('tubeModal')">
+  <div class="modal-box">
+    <div class="modal-head"><h3 id="tm-title">Tube RMN</h3><button class="btn-ghost" onclick="closeModal('tubeModal')">Fermer</button></div>
+    <input type="hidden" id="tm-id">
+    <div class="tm-info" id="tm-info"></div>
+    <div class="grid-2" style="margin-bottom:8px;">
+      <div class="field"><label>Statut</label><select class="txt" id="tm-status"></select></div>
+      <div class="field"><label>Position passeur</label><input type="text" class="txt" id="tm-pos" placeholder="ex. 12"></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:8px;">
+      <div class="field"><label>Expérience</label><select class="txt" id="tm-exp"></select></div>
+      <div class="field"><label>pH mesuré</label><input type="text" inputmode="decimal" id="tm-ph" placeholder="—"></div>
+    </div>
+    <div class="field" style="margin-bottom:8px;"><label>Remarque / nom du jeu de données</label><input type="text" class="txt" id="tm-note" placeholder="ex. expno 10–13, phasage manuel"></div>
+    <button class="btn-main" onclick="saveTubeEdit()">Enregistrer</button>
+    <button class="btn-ghost wide del" style="margin-top:10px;" onclick="deleteTube()">Supprimer cet enregistrement</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toast-msg"></span><button id="toast-undo">Annuler</button></div>
+<input type="file" id="import-file" accept=".json,application/json" style="display:none" onchange="importJson(this)">
+
+<script>
+const BUFFER_SYSTEMS = {
+  phosphate: {
+    id: 'phosphate', shortName: 'Phosphate', pka: 6.86, rangeMin: 5.8, rangeMax: 8.0, defaultPh: 7.0,
+    mode: 'two_solids',
+    comp1: { name: 'NaH₂PO₄·H₂O', mw: 137.99 },
+    comp2: { name: 'Na₂HPO₄ anhydre', mw: 141.96 },
+    comp1Forms: [
+      { id: 'nah2po4_h2o', name: 'NaH₂PO₄·H₂O', mw: 137.99 },
+      { id: 'nah2po4_anh', name: 'NaH₂PO₄ anhydre', mw: 119.98 },
+      { id: 'nah2po4_2h2o', name: 'NaH₂PO₄·2H₂O', mw: 156.01 }
+    ],
+    comp2Forms: [
+      { id: 'na2hpo4_anh', name: 'Na₂HPO₄ anhydre', mw: 141.96 },
+      { id: 'na2hpo4_2h2o', name: 'Na₂HPO₄·2H₂O', mw: 177.99 },
+      { id: 'na2hpo4_7h2o', name: 'Na₂HPO₄·7H₂O', mw: 268.07 },
+      { id: 'na2hpo4_12h2o', name: 'Na₂HPO₄·12H₂O', mw: 358.14 }
+    ]
+  },
+  acetate: {
+    id: 'acetate', shortName: 'Acétate', pka: 4.76, rangeMin: 3.8, rangeMax: 5.8, defaultPh: 4.8,
+    mode: 'acid_base_salt',
+    comp1: { name: 'Acide acétique', mw: 60.05, density: 1.049 },
+    comp2: { name: 'Acétate Na·3H₂O', mw: 136.08 }
+  },
+  formate: {
+    id: 'formate', shortName: 'Formiate', pka: 3.75, rangeMin: 2.8, rangeMax: 4.8, defaultPh: 3.8,
+    mode: 'acid_base_salt',
+    comp1: { name: 'Acide formique', mw: 46.03, density: 1.22 },
+    comp2: { name: 'Formiate Na', mw: 68.01 }
+  },
+  citrate: {
+    id: 'citrate', shortName: 'Citrate', pka: 5.40, rangeMin: 3.0, rangeMax: 6.2, defaultPh: 5.0,
+    mode: 'two_solids',
+    comp1: { name: 'Acide citrique·H₂O', mw: 210.14 },
+    comp2: { name: 'Citrate Na₃·2H₂O', mw: 294.10 }
+  },
+  mes: {
+    id: 'mes', shortName: 'MES', pka: 6.15, rangeMin: 5.5, rangeMax: 6.7, defaultPh: 6.1,
+    mode: 'zwitterion_naoh', comp1: { name: 'MES·H₂O', mw: 213.25 }, titrant: { name: 'NaOH 1 M' }
+  },
+  hepes: {
+    id: 'hepes', shortName: 'HEPES', pka: 7.55, rangeMin: 6.8, rangeMax: 8.2, defaultPh: 7.5,
+    mode: 'zwitterion_naoh', comp1: { name: 'HEPES', mw: 238.30 }, titrant: { name: 'NaOH 1 M' }
+  },
+  tris: {
+    id: 'tris', shortName: 'Tris-HCl', pka: 8.06, rangeMin: 7.0, rangeMax: 9.0, defaultPh: 8.0,
+    mode: 'base_hcl', comp1: { name: 'Tris base', mw: 121.14 }, titrant: { name: 'HCl 1 M' }
+  }
+};
+
+function defaultDb() {
+  return {
+    stocks: {
+      phos: { name: "Phosphate", vol: 50.0, maxVol: 50.0, color: "#1c64d6" },
+      dss:  { name: "DSS",       vol: 10.0, maxVol: 25.0, color: "#2b8a3e" },
+      nan3: { name: "NaN₃",      vol: 10.0, maxVol: 25.0, color: "#d9480f" },
+      b5x:  { name: "Tampon",    vol: 10.0, maxVol: 25.0, color: "#6741d9" },
+      d2o:  { name: "D₂O",       vol: 10.0, maxVol: 10.0, color: "#0b7f95" }
+    },
+    samples: [
+      { id: 's_test_500', parentId: null, name: 'Moût-Test-500', experiment: 'Stock mère', vol_mL: 400.0, init_mL: 500.0, location: 'Congélateur -80°C', treatment: 'Brut', tubesMade: 0 },
+      { id: 's_test_4c', parentId: 's_test_500', name: 'Moût-Test-500 · Aliq 4°C', experiment: 'RMN à 24h', vol_mL: 50.0, init_mL: 50.0, location: 'Chambre froide 4°C', treatment: 'Brut', tubesMade: 0 },
+      { id: 's_test_80c', parentId: 's_test_500', name: 'Moût-Test-500 · Aliq -80°C', experiment: 'RMN T0', vol_mL: 50.0, init_mL: 50.0, location: 'Congélateur -80°C', treatment: 'Brut', tubesMade: 0 }
+    ],
+    collapsedParents: {},
+    activeSampleId: 's_test_4c',
+    expFilter: 'ALL',
+    bufferSystemId: 'phosphate',
+    motherCalc: {
+      vol_mL: 10, conc_M: 1.5, ph: 7.0, d2o_pct: 0,
+      comp1FormId: 'nah2po4_h2o', comp1Mw: 137.99,
+      comp2FormId: 'na2hpo4_anh', comp2Mw: 141.96,
+      dss_vol: 10, dss_mM: 100, dss_d2o_pct: 0,
+      nan3_vol: 10, nan3_mM: 100, nan3_d2o_pct: 0
+    },
+    params: { finPhos: 150, finDss: 1.0, finNan3: 1.0, factor: 5, bufD2oPct: 0, tubeD2oPct: 10, nmrExp: 'noesy' },
+    selectedMother: 'phos',
+    checked: {},
+    tubes: [],
+    journal: [],
+    settings: { operator: '', project: 'Métabolomique vigne', spectro: '', tempK: 300, lastExport: null }
+  };
+}
+
+let db = defaultDb();
+try {
+  const raw = localStorage.getItem('rmn_bench_v12') || localStorage.getItem('rmn_bench_v11') || localStorage.getItem('rmn_bench_v10');
+  if (raw) {
+    const p = JSON.parse(raw);
+    db = {
+      ...defaultDb(),
+      ...p,
+      collapsedParents: p.collapsedParents || {},
+      params: { ...defaultDb().params, ...(p.params || {}) },
+      motherCalc: { ...defaultDb().motherCalc, ...(p.motherCalc || {}) }
+    };
+    if (p.stocks) {
+      for (const k of Object.keys(db.stocks)) {
+        if (p.stocks[k]) db.stocks[k] = { ...db.stocks[k], ...p.stocks[k], color: defaultDb().stocks[k].color };
+      }
+    }
+    if (Array.isArray(p.samples)) {
+      db.samples = p.samples.map(s => ({ experiment: '', ...s }));
+    }
+  }
+} catch(e) {}
+
+if (!BUFFER_SYSTEMS[db.bufferSystemId]) db.bufferSystemId = 'phosphate';
+ensureDb();
+
+function save() { try { localStorage.setItem('rmn_bench_v12', JSON.stringify(db)); } catch(e) {} }
+function num(v, fb = 0) { const n = parseFloat(String(v).replace(',', '.').trim()); return isNaN(n) ? fb : n; }
+function getBufSys() { return BUFFER_SYSTEMS[db.bufferSystemId] || BUFFER_SYSTEMS.phosphate; }
+function getActiveSample() {
+  if (!db.samples.length) { db.activeSampleId = null; return null; }
+  let s = db.samples.find(x => x.id === db.activeSampleId);
+  if (!s) { s = db.samples[0]; db.activeSampleId = s.id; }
+  return s;
+}
+
+// ---------- Helpers d'interface (présentation uniquement) ----------
+function haptic(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 8); } catch(e) {} }
+function unitHtml(v) { return String(v).replace(/\s(µL|mL|mg|g|mM|M|tubes?)$/, ' <small>$1</small>'); }
+const CHK_SVG = '<svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg>';
+function stepsHtml(rows, rerender, btnId) {
+  const done = rows.filter(r => db.checked[r.k]).length;
+  const all = rows.length > 0 && done === rows.length;
+  const btn = document.getElementById(btnId);
+  if (btn) btn.classList.toggle('ready', all);
+  const meta = `<div class="steps-meta ${all ? 'complete' : ''}"><span>${done}/${rows.length}</span><div class="steps-bar"><i style="width:${rows.length ? (done / rows.length) * 100 : 0}%"></i></div><span>${all ? 'Prêt ✓' : 'étapes'}</span></div>`;
+  return meta + rows.map(r => `
+    <div class="step ${db.checked[r.k] ? 'done' : ''}" style="--c:${r.color}" onclick="haptic(${db.checked[r.k] ? 6 : 14});db.checked['${r.k}']=!db.checked['${r.k}'];${rerender}()">
+      <div class="step-left">
+        <div class="chk">${CHK_SVG}</div>
+        <div class="step-txt"><div class="step-name">${r.name}</div><div class="step-sub">${r.sub}</div></div>
+      </div>
+      <div class="step-val">${unitHtml(r.val)}</div>
+    </div>
+  `).join('');
+}
+function staticStep(name, sub, val, color) {
+  return `<div class="step static" style="--c:${color}"><div class="step-left"><div class="step-txt"><div class="step-name">${name}</div><div class="step-sub">${sub}</div></div></div><div class="step-val">${unitHtml(val)}</div></div>`;
+}
+function flashBtn(btn) { if (!btn) return; btn.classList.add('ok'); haptic([12, 40, 18]); setTimeout(() => btn.classList.remove('ok'), 1200); }
+
+function toggleBlock(id, btn) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+  if (btn) {
+    const isOpen = el.classList.contains('open');
+    btn.textContent = btn.textContent.replace(isOpen ? '▾' : '▴', isOpen ? '▴' : '▾');
+  }
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function go(id, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', (b.dataset.views || '').split(' ').includes(id)));
+  document.getElementById('v-' + id).classList.add('active');
+  if (id === '5x' || id === 'mothers') window._lastSol = id;
+  window.scrollTo(0, 0);
+  if (id === 'tube') { renderSampleSelector(); calcTube(); }
+  if (id === 'samples') renderSamplesPage();
+  if (id === '5x') { updateLabels(); calc5X(); }
+  if (id === 'mothers') renderMothers();
+  if (id === 'analyses') renderAnalyses();
+  if (id === 'journal') renderJournal();
+}
+
+function updateTopCounter() {
+  const total = db.samples.reduce((a, s) => a + (s.tubesMade || 0), 0);
+  document.getElementById('top-counter').textContent = `${total} tube${total > 1 ? 's' : ''}`;
+}
+
+// ==================== 1. TUBE RMN ====================
+function renderSampleSelector() {
+  const sel = document.getElementById('tube-sample-select');
+  const active = getActiveSample();
+  if (!db.samples.length) {
+    sel.innerHTML = `<option value="">Aucun échantillon disponible</option>`;
+    document.getElementById('asb-vol-ml').textContent = `0.0 mL`;
+    document.getElementById('asb-tags').innerHTML = `<span class="tag">Créer un échantillon</span>`;
+    updateTopCounter();
+    return;
+  }
+  sel.innerHTML = db.samples.map(s => {
+    const expLabel = s.experiment ? ` [${s.experiment}]` : '';
+    return `<option value="${s.id}" ${active && s.id === active.id ? 'selected' : ''}>${s.name}${expLabel}</option>`;
+  }).join('');
+  if (active) {
+    document.getElementById('asb-vol-ml').textContent = `${active.vol_mL.toFixed(1)} mL`;
+    const loc = active.location || 'Non précisé';
+    const cls = loc.includes('-80') || loc.includes('-20') ? 'frozen' : (loc.includes('4°') ? 'cold' : '');
+    const expTag = active.experiment ? `<span class="tag exp">${active.experiment}</span> ` : '';
+    document.getElementById('asb-tags').innerHTML = `${expTag}<span class="tag ${cls}">${loc}</span> <span class="tag">${active.treatment || 'Brut'}</span>${metaLine(active) ? ` <span class="tag vine">${esc(metaLine(active))}</span>` : ''}`;
+  }
+  updateTopCounter();
+}
+
+function selectSampleFromTube(id) {
+  db.activeSampleId = id; db.checked = {}; save(); renderSampleSelector(); calcTube();
+}
+
+function calcTube() {
+  const V = 600;
+  const f = db.params.factor || 5;
+  const vBuf = V / f;
+  const bufD2oPct = Math.max(0, Math.min(100, db.params.bufD2oPct || 0));
+  const targetD2oPct = Math.max(0, Math.min(100, db.params.tubeD2oPct != null ? db.params.tubeD2oPct : 10));
+  const vD2oTarget = V * (targetD2oPct / 100);
+  const vD2oFromBuf = vBuf * (bufD2oPct / 100);
+  const vD2o = Math.max(0, vD2oTarget - vD2oFromBuf);
+  const vMust = Math.max(0, V - vBuf - vD2o);
+  const finalD2oPct = ((vD2oFromBuf + vD2o) / V) * 100;
+  const active = getActiveSample();
+  const sys = getBufSys();
+
+  const totalH = 72;
+  const hD2o = (vD2o / V) * totalH;
+  const hBuf = Math.min(totalH - hD2o, (vBuf / V) * totalH);
+  const hMust = Math.max(0, totalH - hD2o - hBuf);
+  document.getElementById('tube-svg-d2o').setAttribute('y', 86 - hD2o);
+  document.getElementById('tube-svg-d2o').setAttribute('height', hD2o);
+  document.getElementById('tube-svg-buf').setAttribute('y', 86 - hD2o - hBuf);
+  document.getElementById('tube-svg-buf').setAttribute('height', hBuf);
+  document.getElementById('tube-svg-must').setAttribute('y', 14);
+  document.getElementById('tube-svg-must').setAttribute('height', hMust);
+  const bottomEl = document.getElementById('tube-svg-bottom');
+  if (bottomEl) bottomEl.setAttribute('fill', hD2o > 0.05 ? 'url(#gD2o)' : (hBuf > 0.05 ? 'url(#gBuf)' : 'url(#gMust)'));
+
+  document.getElementById('hero-must').textContent = `${vMust.toFixed(0)} µL (${((vMust/V)*100).toFixed(0)}%)`;
+  document.getElementById('hero-buf-lbl').textContent = sys.shortName;
+  document.getElementById('hero-buf').textContent = `${db.params.finPhos} mM`;
+  document.getElementById('hero-add').textContent = `${db.params.finDss} · ${db.params.finNan3} mM`;
+
+  let warn = '';
+  if (vMust <= 0) warn = `Facteur ${f}X trop faible.`;
+  else if (active && vMust > active.vol_mL * 1000) warn = `Volume insuffisant (${active.vol_mL.toFixed(2)} mL restants).`;
+  const wEl = document.getElementById('tube-warn');
+  wEl.style.display = warn ? 'block' : 'none';
+  wEl.textContent = warn;
+
+  const bufSub = bufD2oPct > 0
+    ? `Contient ${bufD2oPct}% D₂O (${vD2oFromBuf.toFixed(0)} µL) · Stock ${(db.stocks.b5x.vol || 0).toFixed(1)} mL`
+    : `Stock ${(db.stocks.b5x.vol || 0).toFixed(1)} mL`;
+
+  const rows = [
+    { k: 't5x',  name: `Tampon ${sys.shortName} ${f}X${bufD2oPct > 0 ? ` (${bufD2oPct}% D₂O)` : ''}`, sub: bufSub, val: `${vBuf.toFixed(1)} µL`, color: 'var(--buf)' },
+    { k: 'tsmp', name: active ? active.name : 'Moût', sub: active && active.experiment ? active.experiment : 'Échantillon pur', val: `${vMust.toFixed(1)} µL`, color: 'var(--must)' }
+  ];
+  if (vD2o > 0.05) {
+    rows.push({ k: 'td2o', name: 'D₂O 99.9%', sub: `Complément (${finalD2oPct.toFixed(1)}% final) · Stock ${(db.stocks.d2o.vol || 0).toFixed(1)} mL`, val: `${vD2o.toFixed(1)} µL`, color: 'var(--d2o)' });
+  }
+
+  document.getElementById('tube-steps').innerHTML = stepsHtml(rows, 'calcTube', 'btn-tube-done');
+
+  window._tube = { f, sys, vBuf, vMust, vD2o, vD2oFromBuf, bufD2oPct, finalD2oPct };
+}
+
+function finishTube() {
+  const snap = JSON.stringify(db);
+  const f = db.params.factor || 5;
+  const vBuf_mL = (600 / f) / 1000;
+  const vMust_mL = window._tube ? window._tube.vMust / 1000 : 0.42;
+  const vD2o_mL = window._tube ? window._tube.vD2o / 1000 : 0.06;
+  const active = getActiveSample();
+  if (active) {
+    active.vol_mL = Math.max(0, +(active.vol_mL - vMust_mL).toFixed(3));
+    active.tubesMade = (active.tubesMade || 0) + 1;
+  }
+  db.stocks.b5x.vol = Math.max(0, +((db.stocks.b5x.vol || 0) - vBuf_mL).toFixed(3));
+  if (vD2o_mL > 0) {
+    db.stocks.d2o.vol = Math.max(0, +((db.stocks.d2o.vol || 0) - vD2o_mL).toFixed(3));
+  }
+  const rec = createTubeRecord(active, f);
+  db.checked = {};
+  save(); renderSampleSelector(); calcTube();
+  const btn = document.getElementById('btn-tube-done');
+  btn.textContent = `✓ Tube #${active ? active.tubesMade : ''} enregistré`;
+  flashBtn(btn);
+  toast(`${rec.code} enregistré`, () => restoreSnapshot(snap, 'Tube annulé, volumes restaurés'));
+  setTimeout(() => btn.textContent = "Valider ce tube RMN", 1200);
+}
+
+// ==================== 2. ÉCHANTILLONS ====================
+function toggleParentStack(parentId, ev) {
+  if (ev) ev.stopPropagation();
+  db.collapsedParents[parentId] = !db.collapsedParents[parentId];
+  save();
+  renderSamplesPage();
+}
+
+function renderSampleCardHtml(s, active, isChild, childrenCount) {
+  const isAct = active && s.id === active.id;
+  const cap = Math.max(s.init_mL || 0, s.vol_mL, 0.01);
+  const pct = Math.max(0, Math.min(100, Math.round((s.vol_mL / cap) * 100)));
+  const isCollapsed = !!db.collapsedParents[s.id];
+
+  const expTag = s.experiment ? `<span class="tag exp">${s.experiment}</span>` : '';
+  const stackBtn = childrenCount > 0
+    ? `<button class="stack-btn" onclick="toggleParentStack('${s.id}', event)">${isCollapsed ? `▸ ${childrenCount} aliquote${childrenCount > 1 ? 's' : ''}` : `▾ Masquer (${childrenCount})`}</button>`
+    : '';
+  const line2 = (expTag || stackBtn) ? `<div class="smp-exp-line">${expTag}${stackBtn}</div>` : '';
+
+  // Tube Falcon : intérieur de y=6 à y=42 (36 unités)
+  const cid = 'fc_' + String(s.id).replace(/[^a-zA-Z0-9_-]/g, '');
+  const lh = pct * 0.36;
+  const ly = 42 - lh;
+  return `
+    <div class="smp-card ${isAct ? 'active' : ''} ${isChild ? 'child' : ''}">
+      <div class="smp-left" onclick="haptic();db.activeSampleId='${s.id}';save();renderSamplesPage();">
+        <svg width="26" height="48" viewBox="0 0 24 44" style="flex-shrink:0;overflow:visible;">
+          <defs><clipPath id="${cid}"><path d="M5 6 L19 6 L19 32 L13.2 41.6 Q12 43 10.8 41.6 L5 32 Z"/></clipPath></defs>
+          <rect x="3.5" y="0.5" width="17" height="5.5" rx="1.4" fill="${isChild ? '#1c64d6' : '#3a3d44'}"/>
+          <path d="M5 6 L19 6 L19 32 L13.2 41.6 Q12 43 10.8 41.6 L5 32 Z" fill="#f6f7f8"/>
+          <g clip-path="url(#${cid})">
+            <rect x="4" y="${ly}" width="16" height="${lh + 2}" style="fill:var(--must);opacity:.78"/>
+            ${pct > 2 ? `<path d="M4 ${ly - 0.6} Q12 ${ly + 1.2} 20 ${ly - 0.6} L20 ${ly + 0.4} L4 ${ly + 0.4} Z" style="fill:var(--must);opacity:.78"/>` : ''}
+          </g>
+          <g stroke="#a9adb4" stroke-width=".4"><line x1="15" y1="12" x2="18" y2="12"/><line x1="16.5" y1="17" x2="18" y2="17"/><line x1="15" y1="22" x2="18" y2="22"/><line x1="16.5" y1="27" x2="18" y2="27"/></g>
+          <path d="M5 6 L19 6 L19 32 L13.2 41.6 Q12 43 10.8 41.6 L5 32 Z" fill="none" stroke="#8f949c" stroke-width=".9"/>
+          <rect x="6.6" y="8" width="1.4" height="22" rx=".7" fill="#fff" opacity=".65"/>
+        </svg>
+        <div style="min-width:0;">
+          <div class="smp-title">${s.name}</div>
+          ${line2}
+          ${metaLine(s) ? `<div class="smp-vine">${esc(metaLine(s))}</div>` : ''}
+          <div class="smp-meta">${s.location || '—'} · ${s.treatment || 'Brut'} · ${s.tubesMade} tube${s.tubesMade > 1 ? 's' : ''}</div>
+        </div>
+      </div>
+      <div class="smp-right">
+        <span class="vol-badge">${s.vol_mL.toFixed(1)}<small>mL</small></span>
+        <div class="smp-btns">
+          <button class="btn-ghost" onclick="openAliquotModal('${s.id}')">Aliquoter</button>
+          <button class="btn-ghost icon" aria-label="Modifier" onclick="openEditSampleModal('${s.id}')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg></button>
+          <button class="btn-ghost icon del" aria-label="Supprimer" onclick="openDeleteSampleModal('${s.id}')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSamplesPage() {
+  const totalVol = db.samples.reduce((a, s) => a + s.vol_mL, 0);
+  document.getElementById('stat-smp-count').textContent = db.samples.length;
+  document.getElementById('stat-smp-vol').textContent = `${totalVol.toFixed(0)} mL`;
+  updateTopCounter();
+
+  const exps = [...new Set(db.samples.map(s => (s.experiment || '').trim()).filter(Boolean))];
+  if (db.expFilter !== 'ALL' && !exps.includes(db.expFilter)) db.expFilter = 'ALL';
+  const filterBar = document.getElementById('exp-filter-bar');
+  if (exps.length) {
+    filterBar.style.display = 'flex';
+    filterBar.innerHTML = [
+      `<button class="exp-chip ${db.expFilter === 'ALL' ? 'active' : ''}" onclick="db.expFilter='ALL';renderSamplesPage()">Tous (${db.samples.length})</button>`,
+      ...exps.map(e => {
+        const cnt = db.samples.filter(s => (s.experiment || '').trim() === e).length;
+        const safeE = e.replace(/'/g, "\\'");
+        return `<button class="exp-chip ${db.expFilter === e ? 'active' : ''}" onclick="db.expFilter='${safeE}';renderSamplesPage()">${e} (${cnt})</button>`;
+      })
+    ].join('');
+  } else {
+    filterBar.style.display = 'none';
+  }
+
+  const active = getActiveSample();
+  if (!db.samples.length) {
+    document.getElementById('samples-list').innerHTML = `<div class="empty-state">Aucun échantillon. Appuyez sur <strong>+ Nouveau</strong> pour en créer un.</div>`;
+    return;
+  }
+
+  const q = (window._smpQuery || '').toLowerCase().trim();
+  if (db.expFilter !== 'ALL' || q) {
+    const filtered = db.samples.filter(s => (db.expFilter === 'ALL' || (s.experiment || '').trim() === db.expFilter) && (!q || sampleHaystack(s).includes(q)));
+    document.getElementById('samples-list').innerHTML = filtered.length
+      ? filtered.map(s => renderSampleCardHtml(s, active, false, 0)).join('')
+      : `<div class="empty-state">Aucun échantillon ne correspond.</div>`;
+    return;
+  }
+
+  const roots = db.samples.filter(s => !s.parentId || !db.samples.some(p => p.id === s.parentId));
+  document.getElementById('samples-list').innerHTML = roots.map(root => {
+    const children = db.samples.filter(c => c.parentId === root.id);
+    const isCollapsed = !!db.collapsedParents[root.id];
+    const hasStack = children.length > 0 && isCollapsed;
+    const rootHtml = renderSampleCardHtml(root, active, false, children.length);
+    const childrenHtml = (!isCollapsed && children.length > 0)
+      ? children.map(c => renderSampleCardHtml(c, active, true, 0)).join('')
+      : '';
+    return `<div class="smp-group ${hasStack ? 'has-stack' : ''}">${rootHtml}${childrenHtml}</div>`;
+  }).join('');
+}
+
+function addNewSample() {
+  const name = document.getElementById('new-smp-name').value.trim() || `Échantillon ${db.samples.length + 1}`;
+  const vol = Math.max(0, num(document.getElementById('new-smp-vol').value, 500));
+  const experiment = document.getElementById('new-smp-exp').value.trim();
+  const location = document.getElementById('new-smp-loc').value.trim() || 'Congélateur -80°C';
+  const treatment = document.getElementById('new-smp-treat').value.trim() || 'Brut';
+  const id = 's_' + Date.now();
+  const meta = readMeta('new-smp');
+  db.samples.unshift({ id, parentId: null, name, experiment, vol_mL: vol, init_mL: vol, location, treatment, tubesMade: 0, ...meta });
+  logEvent('sample', `Échantillon créé : ${name} — ${vol} mL${metaLine(meta) ? ` · ${metaLine(meta)}` : ''} · ${location}`, id);
+  db.activeSampleId = id;
+  document.getElementById('new-smp-name').value = '';
+  document.getElementById('new-smp-exp').value = '';
+  document.getElementById('new-smp-box').classList.remove('open');
+  save(); renderSamplesPage();
+}
+
+function openAliquotModal(id) {
+  const p = db.samples.find(x => x.id === id);
+  if (!p) return;
+  window._aliqParentId = id;
+  document.getElementById('aliqTitle').textContent = `Aliquoter ${p.name}`;
+  document.getElementById('aliq-vol').value = Math.min(50, +(p.vol_mL / 2).toFixed(1)) || 10;
+  document.getElementById('aliq-qty').value = '1';
+  document.getElementById('aliq-exp').value = p.experiment || '';
+  document.getElementById('aliq-loc').value = '';
+  document.getElementById('aliq-treat').value = p.treatment || 'Brut';
+  updateAliqPreview();
+  document.getElementById('aliquotModal').classList.add('open');
+}
+
+function updateAliqPreview() {
+  const p = db.samples.find(x => x.id === window._aliqParentId);
+  if (!p) return;
+  const vol = Math.max(0, num(document.getElementById('aliq-vol').value, 0));
+  const qty = Math.max(1, parseInt(document.getElementById('aliq-qty').value, 10) || 1);
+  const tot = vol * qty;
+  document.getElementById('aliq-preview').textContent = `Prélèvement : ${tot.toFixed(1)} mL / ${p.vol_mL.toFixed(1)} mL`;
+  const w = document.getElementById('aliq-warn');
+  if (tot > p.vol_mL + 0.001) { w.style.display = 'block'; w.textContent = 'Volume insuffisant.'; }
+  else w.style.display = 'none';
+}
+
+function confirmAliquot() {
+  const p = db.samples.find(x => x.id === window._aliqParentId);
+  if (!p) return;
+  const vol = Math.max(0.01, num(document.getElementById('aliq-vol').value, 0));
+  const qty = Math.max(1, parseInt(document.getElementById('aliq-qty').value, 10) || 1);
+  if (vol * qty > p.vol_mL + 0.001) return;
+  const exp = document.getElementById('aliq-exp').value.trim();
+  const loc = document.getElementById('aliq-loc').value.trim() || p.location;
+  const treat = document.getElementById('aliq-treat').value.trim() || p.treatment;
+  p.vol_mL = Math.max(0, +(p.vol_mL - vol * qty).toFixed(3));
+  const rootId = p.parentId && db.samples.some(x => x.id === p.parentId) ? p.parentId : p.id;
+  const idx = db.samples.findIndex(x => x.id === rootId);
+  const baseCount = db.samples.filter(x => x.parentId === rootId).length;
+  db.collapsedParents[rootId] = false;
+  for (let i = 0; i < qty; i++) {
+    const newId = 's_' + Date.now() + '_' + i;
+    db.samples.splice(idx + 1 + i, 0, {
+      id: newId, parentId: rootId, name: `${p.name} · Aliq #${baseCount + i + 1}`,
+      experiment: exp, vol_mL: vol, init_mL: vol, location: loc, treatment: treat, tubesMade: 0, ...pickMeta(p)
+    });
+    db.activeSampleId = newId;
+  }
+  logEvent('aliquot', `${qty} aliquote${qty > 1 ? 's' : ''} de ${vol} mL prélevée${qty > 1 ? 's' : ''} sur ${p.name} → ${loc}${exp ? ` [${exp}]` : ''} (reste ${p.vol_mL.toFixed(1)} mL)`, p.id);
+  save(); closeModal('aliquotModal'); renderSamplesPage();
+}
+
+function openEditSampleModal(id) {
+  const s = db.samples.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('edit-smp-id').value = s.id;
+  document.getElementById('edit-smp-name').value = s.name;
+  document.getElementById('edit-smp-vol').value = s.vol_mL;
+  document.getElementById('edit-smp-cap').value = s.init_mL || s.vol_mL;
+  document.getElementById('edit-smp-exp').value = s.experiment || '';
+  document.getElementById('edit-smp-loc').value = s.location || '';
+  document.getElementById('edit-smp-treat').value = s.treatment || '';
+  fillMeta('edit-smp', s);
+  renderSampleHistory(s.id);
+  document.getElementById('editSampleModal').classList.add('open');
+}
+
+function saveSampleEdit() {
+  const s = db.samples.find(x => x.id === document.getElementById('edit-smp-id').value);
+  if (!s) return;
+  const oldCap = s.init_mL || s.vol_mL;
+  s.name = document.getElementById('edit-smp-name').value.trim() || s.name;
+  s.vol_mL = Math.max(0, num(document.getElementById('edit-smp-vol').value, s.vol_mL));
+  const rawCap = num(document.getElementById('edit-smp-cap').value, oldCap);
+  s.init_mL = Math.max(s.vol_mL, rawCap);
+  s.experiment = document.getElementById('edit-smp-exp').value.trim();
+  s.location = document.getElementById('edit-smp-loc').value.trim();
+  s.treatment = document.getElementById('edit-smp-treat').value.trim();
+  Object.assign(s, readMeta('edit-smp'));
+  logEvent('edit', `Échantillon modifié : ${s.name} — ${s.vol_mL} mL${metaLine(s) ? ` · ${metaLine(s)}` : ''}`, s.id);
+  save(); closeModal('editSampleModal'); renderSamplesPage();
+}
+
+function openDeleteSampleModal(id) {
+  const s = db.samples.find(x => x.id === id);
+  if (!s) return;
+  window._deleteSampleId = id;
+  const children = db.samples.filter(c => c.parentId === id).length;
+  document.getElementById('del-smp-msg').textContent = children > 0
+    ? `Supprimer « ${s.name} » (${s.vol_mL.toFixed(1)} mL) ? Ses ${children} aliquote(s) resteront conservées.`
+    : `Supprimer définitivement « ${s.name} » (${s.vol_mL.toFixed(1)} mL) ?`;
+  document.getElementById('deleteSampleModal').classList.add('open');
+}
+
+function confirmDeleteSample() {
+  const id = window._deleteSampleId;
+  if (!id) return;
+  const delS = db.samples.find(x => x.id === id);
+  if (delS) logEvent('delete', `Échantillon supprimé : ${delS.name} (${delS.vol_mL.toFixed(1)} mL)`, null);
+  db.samples.forEach(c => { if (c.parentId === id) c.parentId = null; });
+  db.samples = db.samples.filter(x => x.id !== id);
+  if (db.activeSampleId === id) {
+    db.activeSampleId = db.samples.length ? db.samples[0].id : null;
+  }
+  save(); closeModal('deleteSampleModal'); renderSamplesPage(); renderSampleSelector(); calcTube();
+}
+
+// ==================== 3. TAMPON ====================
+function updateLabels() {
+  const f = db.params.factor;
+  const sys = getBufSys();
+  const d2oTxt = (db.params.bufD2oPct || 0) > 0 ? ` · ${db.params.bufD2oPct}% D₂O` : '';
+  document.getElementById('lbl-tube-buf-in').textContent = `${sys.shortName} final (mM)`;
+  document.getElementById('buf-card-title').textContent = `Préparation Tampon ${sys.shortName} ${f}X${d2oTxt}`;
+  document.getElementById('lbl-b-phos').textContent = `${sys.shortName} ${f}X`;
+  document.getElementById('lbl-b-dss').textContent = `DSS ${f}X`;
+  document.getElementById('lbl-b-nan3').textContent = `NaN₃ ${f}X`;
+  document.getElementById('in-lbl-phos').textContent = `${sys.shortName} (mM)`;
+  document.getElementById('in-lbl-dss').textContent = `DSS (mM)`;
+  document.getElementById('in-lbl-nan3').textContent = `NaN₃ (mM)`;
+  document.querySelectorAll('#factorPills button').forEach(b => b.classList.toggle('active', parseInt(b.textContent) === f));
+}
+
+function syncFromTube() {
+  db.params.finPhos = num(document.getElementById('finPhos').value, 150);
+  db.params.finDss = num(document.getElementById('finDss').value, 1);
+  db.params.finNan3 = num(document.getElementById('finNan3').value, 1);
+  db.params.tubeD2oPct = Math.max(0, Math.min(100, num(document.getElementById('tubeD2oPctIn').value, 10)));
+  const f = Math.max(1, num(document.getElementById('bufFactor').value, 5));
+  db.params.factor = f;
+  document.getElementById('stockPhosIn').value = +(db.params.finPhos * f).toFixed(2);
+  document.getElementById('stockDssIn').value = +(db.params.finDss * f).toFixed(2);
+  document.getElementById('stockNan3In').value = +(db.params.finNan3 * f).toFixed(2);
+  save(); updateLabels(); calcTube(); calc5X();
+}
+
+function setFactor(f) {
+  haptic();
+  db.params.factor = f;
+  document.getElementById('bufFactor').value = f;
+  document.getElementById('stockPhosIn').value = +(db.params.finPhos * f).toFixed(2);
+  document.getElementById('stockDssIn').value = +(db.params.finDss * f).toFixed(2);
+  document.getElementById('stockNan3In').value = +(db.params.finNan3 * f).toFixed(2);
+  save(); updateLabels(); calcTube(); calc5X();
+}
+
+function syncFromBufConc() {
+  const f = db.params.factor || 5;
+  db.params.finPhos = +(num(document.getElementById('stockPhosIn').value, 750) / f).toFixed(2);
+  db.params.finDss = +(num(document.getElementById('stockDssIn').value, 5) / f).toFixed(3);
+  db.params.finNan3 = +(num(document.getElementById('stockNan3In').value, 5) / f).toFixed(3);
+  const d2oEl = document.getElementById('bufD2oPctIn');
+  if (d2oEl) db.params.bufD2oPct = Math.max(0, Math.min(100, num(d2oEl.value, 0)));
+  document.getElementById('finPhos').value = db.params.finPhos;
+  document.getElementById('finDss').value = db.params.finDss;
+  document.getElementById('finNan3').value = db.params.finNan3;
+  save(); updateLabels(); calcTube(); calc5X();
+}
+
+function calc5X() {
+  const f = db.params.factor || 5;
+  const V_mL = num(document.getElementById('vol5x').value, 10);
+  const sys = getBufSys();
+  const mother_mM = (db.motherCalc.conc_M || 1.5) * 1000;
+  const bufD2oPct = Math.max(0, Math.min(100, db.params.bufD2oPct || 0));
+  document.getElementById('stock5xDirect').value = (db.stocks.b5x.vol || 0).toFixed(1);
+
+  const sPhos = +(db.params.finPhos * f).toFixed(2);
+  const sDss = +(db.params.finDss * f).toFixed(2);
+  const sNan3 = +(db.params.finNan3 * f).toFixed(2);
+
+  document.getElementById('val-b-phos').textContent = `${sPhos} mM`;
+  document.getElementById('val-b-dss').textContent = `${sDss} mM`;
+  document.getElementById('val-b-nan3').textContent = `${sNan3} mM`;
+  document.getElementById('val-b-stock').textContent = `${(db.stocks.b5x.vol || 0).toFixed(1)} mL`;
+
+  const vPhos = (sPhos / mother_mM) * V_mL;
+  const vDss = (sDss / (db.motherCalc.dss_mM || 100)) * V_mL;
+  const vNan3 = (sNan3 / (db.motherCalc.nan3_mM || 100)) * V_mL;
+  const vD2o = (bufD2oPct / 100) * V_mL;
+  const vH2o = V_mL - (vPhos + vDss + vNan3 + vD2o);
+
+  const svgD2o = document.getElementById('b5x-svg-d2o');
+  if (svgD2o) {
+    const hD2o = Math.min(44, (bufD2oPct / 100) * 44);
+    svgD2o.setAttribute('y', 82 - hD2o);
+    svgD2o.setAttribute('height', hD2o);
+  }
+
+  const wEl = document.getElementById('buf-warn');
+  if (vH2o < -0.001) {
+    wEl.style.display = 'block';
+    const maxD2oPct = Math.max(0, ((V_mL - (vPhos + vDss + vNan3)) / V_mL) * 100);
+    wEl.textContent = `Volume (${(vPhos+vDss+vNan3+vD2o).toFixed(2)} mL) > ${V_mL} mL (max ${maxD2oPct.toFixed(0)}% D₂O avec ces solutions mères).`;
+  } else wEl.style.display = 'none';
+
+  const fmt = mL => mL < 1 ? `${(mL * 1000).toFixed(0)} µL` : `${mL.toFixed(2)} mL`;
+  const rows = [
+    { k: 'm_phos', name: `${sys.shortName} ${db.motherCalc.conc_M} M`, sub: `Stock ${(db.stocks.phos.vol || 0).toFixed(1)} mL`, val: fmt(vPhos), color: 'var(--phos)' },
+    { k: 'm_dss',  name: `DSS ${db.motherCalc.dss_mM} mM`, sub: `Stock ${(db.stocks.dss.vol || 0).toFixed(1)} mL`, val: fmt(vDss), color: 'var(--dss)' },
+    { k: 'm_nan3', name: `NaN₃ ${db.motherCalc.nan3_mM} mM`, sub: `Stock ${(db.stocks.nan3.vol || 0).toFixed(1)} mL`, val: fmt(vNan3), color: 'var(--nan3)' }
+  ];
+  if (vD2o > 0.0001) {
+    rows.push({ k: 'm_d2o', name: `D₂O 99.9% (${bufD2oPct}%)`, sub: `Stock ${(db.stocks.d2o.vol || 0).toFixed(1)} mL`, val: fmt(vD2o), color: 'var(--d2o)' });
+  }
+  if (vH2o > 0.001 || vD2o === 0) {
+    rows.push({ k: 'm_h2o', name: 'H₂O Milli-Q', sub: 'Complément q.s.p.', val: fmt(Math.max(0, vH2o)), color: 'var(--water)' });
+  }
+
+  document.getElementById('steps-5x').innerHTML = stepsHtml(rows, 'calc5X', 'btn-5x-done');
+
+  window._5x = { f, sys, mother_mM, V_mL, sPhos, sDss, sNan3, bufD2oPct, vPhos, vDss, vNan3, vD2o, vH2o };
+}
+
+function finish5X() {
+  if (!window._5x) return;
+  const snap = JSON.stringify(db);
+  const { V_mL, vPhos, vDss, vNan3, vD2o } = window._5x;
+  db.stocks.phos.vol = Math.max(0, +((db.stocks.phos.vol || 0) - vPhos).toFixed(2));
+  db.stocks.dss.vol = Math.max(0, +((db.stocks.dss.vol || 0) - vDss).toFixed(2));
+  db.stocks.nan3.vol = Math.max(0, +((db.stocks.nan3.vol || 0) - vNan3).toFixed(2));
+  if (vD2o > 0) {
+    db.stocks.d2o.vol = Math.max(0, +((db.stocks.d2o.vol || 0) - vD2o).toFixed(2));
+  }
+  db.stocks.b5x.vol = +((db.stocks.b5x.vol || 0) + V_mL).toFixed(2);
+  if (db.stocks.b5x.vol > db.stocks.b5x.maxVol) db.stocks.b5x.maxVol = db.stocks.b5x.vol;
+  const b5 = window._5x;
+  logEvent('buffer', `Tampon ${b5.sys.shortName} ${b5.f}X préparé : ${V_mL} mL — ${b5.sPhos} mM, DSS ${b5.sDss} mM, NaN₃ ${b5.sNan3} mM${b5.bufD2oPct ? `, ${b5.bufD2oPct}% D₂O` : ''} (mère ${db.motherCalc.conc_M} M, pH ${db.motherCalc.ph})`);
+  db.checked = {};
+  save(); calc5X();
+  const btn = document.getElementById('btn-5x-done');
+  btn.textContent = `✓ +${V_mL} mL enregistrés`;
+  flashBtn(btn);
+  toast(`Tampon +${V_mL} mL enregistré`, () => restoreSnapshot(snap, 'Préparation annulée'));
+  setTimeout(() => btn.textContent = "Valider & déduire des mères", 1200);
+}
+
+// ==================== 4. RÉACTIFS ====================
+function setStockDirect(k, valStr) {
+  const v = num(valStr, NaN);
+  if (!isNaN(v) && v >= 0 && db.stocks[k]) {
+    db.stocks[k].vol = v;
+    if (v > db.stocks[k].maxVol) db.stocks[k].maxVol = v;
+    save();
+  }
+}
+
+function setStockMax(k, valStr) {
+  const v = num(valStr, NaN);
+  if (!isNaN(v) && v > 0 && db.stocks[k]) {
+    db.stocks[k].maxVol = v;
+    if (db.stocks[k].vol > v) db.stocks[k].vol = v;
+    save(); renderMothers();
+  }
+}
+
+function renderMothers() {
+  const sys = getBufSys();
+  const items = [
+    { k: 'phos', name: sys.shortName, conc: `${db.motherCalc.conc_M} M` },
+    { k: 'dss',  name: 'DSS', conc: `${db.motherCalc.dss_mM} mM` },
+    { k: 'nan3', name: 'NaN₃', conc: `${db.motherCalc.nan3_mM} mM` },
+    { k: 'b5x',  name: `Tampon ${db.params.factor}X`, conc: `${db.params.finPhos * db.params.factor} mM` },
+    { k: 'd2o',  name: 'D₂O', conc: '99.9%' }
+  ];
+
+  document.getElementById('flacon-grid').innerHTML = items.map(it => {
+    const s = db.stocks[it.k];
+    const vol = s.vol || 0;
+    const maxV = s.maxVol || 10;
+    const pct = Math.max(0, Math.min(100, Math.round((vol / maxV) * 100)));
+    const sel = db.selectedMother === it.k ? 'selected' : '';
+    const low = pct < 15 ? 'low' : '';
+    // Fiole : intérieur y=11..46.5 (35.5 unités)
+    const lh = pct * 0.355;
+    const ly = 46.5 - lh;
+    const cid = 'vc_' + it.k;
+    return `
+      <div class="vial-card ${sel} ${low}" onclick="haptic();db.selectedMother='${it.k}';save();renderMothers()">
+        <svg width="34" height="57" viewBox="0 0 30 50">
+          <defs>
+            <clipPath id="${cid}"><rect x="5.7" y="10.7" width="18.6" height="36.6" rx="3.3"/></clipPath>
+            <linearGradient id="${cid}g" x1="0" x2="1"><stop offset="0" stop-color="${s.color}" stop-opacity=".85"/><stop offset=".4" stop-color="${s.color}" stop-opacity=".5"/><stop offset="1" stop-color="${s.color}" stop-opacity=".9"/></linearGradient>
+          </defs>
+          <rect x="8" y="1" width="14" height="6.5" rx="1.6" fill="${s.color}"/>
+          <rect x="8" y="5.8" width="14" height="1.1" fill="#000" opacity=".22"/>
+          <rect x="9.2" y="1.8" width="1.2" height="4" rx=".6" fill="#fff" opacity=".35"/>
+          <rect x="10" y="7.5" width="10" height="3" fill="#eef0f2" stroke="#9aa0a8" stroke-width=".6"/>
+          <rect x="5" y="10" width="20" height="38" rx="4" fill="#f6f7f8"/>
+          <g clip-path="url(#${cid})">
+            <rect x="5" y="${ly}" width="20" height="${lh + 2}" fill="url(#${cid}g)"/>
+            ${pct > 2 && pct < 99 ? `<path d="M5 ${ly - 0.7} Q15 ${ly + 1.3} 25 ${ly - 0.7} L25 ${ly + 0.5} L5 ${ly + 0.5} Z" fill="url(#${cid}g)"/><path d="M5.7 ${ly - 0.5} Q15 ${ly + 1.2} 24.3 ${ly - 0.5}" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width=".5"/>` : ''}
+          </g>
+          <g stroke="#a9adb4" stroke-width=".4"><line x1="19" y1="18" x2="23" y2="18"/><line x1="21" y1="25" x2="23" y2="25"/><line x1="19" y1="32" x2="23" y2="32"/><line x1="21" y1="39" x2="23" y2="39"/></g>
+          <rect x="5" y="10" width="20" height="38" rx="4" fill="none" stroke="#8f949c" stroke-width=".9"/>
+          <rect x="7.4" y="13" width="1.8" height="31" rx=".9" fill="#fff" opacity=".6"/>
+        </svg>
+        <div class="vial-name">${it.name}</div>
+        <div class="vial-vol" style="color:${s.color}">${vol.toFixed(1)} mL</div>
+        <div class="vial-conc">${it.conc}</div>
+        <div class="vial-meter"><i style="width:${pct}%;background:${s.color}"></i></div>
+      </div>
+    `;
+  }).join('');
+
+  renderPrepCard();
+}
+
+function changeBufferSystem(id) {
+  if (!BUFFER_SYSTEMS[id]) return;
+  db.bufferSystemId = id;
+  const sys = BUFFER_SYSTEMS[id];
+  db.motherCalc.ph = sys.defaultPh;
+  if (sys.comp1) db.motherCalc.comp1Mw = sys.comp1.mw;
+  if (sys.comp2) db.motherCalc.comp2Mw = sys.comp2.mw;
+  if (sys.comp1Forms) db.motherCalc.comp1FormId = sys.comp1Forms[0].id;
+  if (sys.comp2Forms) db.motherCalc.comp2FormId = sys.comp2Forms[0].id;
+  save(); renderMothers();
+}
+
+function selectReagentForm(which, formId) {
+  const sys = getBufSys();
+  const list = which === 1 ? sys.comp1Forms : sys.comp2Forms;
+  const f = list ? list.find(x => x.id === formId) : null;
+  if (f) {
+    if (which === 1) { db.motherCalc.comp1FormId = f.id; db.motherCalc.comp1Mw = f.mw; }
+    else { db.motherCalc.comp2FormId = f.id; db.motherCalc.comp2Mw = f.mw; }
+    save(); renderPrepCard();
+  }
+}
+
+function updateMotherInput(field, raw) {
+  const v = num(raw, NaN);
+  if (isNaN(v)) return;
+  if (field === 'vol_mL' && v >= 0) db.motherCalc.vol_mL = v;
+  if (field === 'conc_M' && v > 0) db.motherCalc.conc_M = v;
+  if (field === 'ph' && v >= 0 && v <= 14) db.motherCalc.ph = v;
+  if (field === 'd2o_pct' && v >= 0 && v <= 100) db.motherCalc.d2o_pct = v;
+  if (field === 'comp1Mw' && v > 0) { db.motherCalc.comp1Mw = v; db.motherCalc.comp1FormId = 'custom'; }
+  if (field === 'comp2Mw' && v > 0) { db.motherCalc.comp2Mw = v; db.motherCalc.comp2FormId = 'custom'; }
+  if (field === 'dss_vol' && v >= 0) db.motherCalc.dss_vol = v;
+  if (field === 'dss_mM' && v > 0) db.motherCalc.dss_mM = v;
+  if (field === 'nan3_vol' && v >= 0) db.motherCalc.nan3_vol = v;
+  if (field === 'nan3_mM' && v > 0) db.motherCalc.nan3_mM = v;
+  save(); calcMother();
+}
+
+function addPreparedMotherToStock() {
+  const k = db.selectedMother;
+  const add = k === 'phos' ? db.motherCalc.vol_mL : (k === 'dss' ? db.motherCalc.dss_vol : db.motherCalc.nan3_vol);
+  if (add > 0 && db.stocks[k]) {
+    db.stocks[k].vol = +((db.stocks[k].vol || 0) + add).toFixed(2);
+    if (db.stocks[k].vol > db.stocks[k].maxVol) db.stocks[k].maxVol = db.stocks[k].vol;
+    haptic([12, 40, 18]);
+    logEvent('stock', `Solution mère ${k === 'phos' ? `${getBufSys().shortName} ${db.motherCalc.conc_M} M pH ${db.motherCalc.ph}` : (k === 'dss' ? `DSS ${db.motherCalc.dss_mM} mM` : `NaN₃ ${db.motherCalc.nan3_mM} mM`)} : +${add} mL (stock ${db.stocks[k].vol} mL)`);
+    save(); renderMothers();
+    toast(`+${add} mL ajoutés au stock`);
+  }
+}
+
+function renderPrepCard() {
+  const k = db.selectedMother;
+  const title = document.getElementById('prep-title');
+  const body = document.getElementById('prep-body');
+  const s = db.stocks[k];
+
+  const stockBar = `
+    <div class="grid-2" style="margin-bottom:10px;">
+      <div class="field"><label>Stock actuel (mL)</label><input type="text" inputmode="decimal" value="${s.vol}" oninput="setStockDirect('${k}', this.value)" onblur="renderMothers()"></div>
+      <div class="field"><label>Capacité flacon (mL)</label><input type="text" inputmode="decimal" value="${s.maxVol}" onchange="setStockMax('${k}', this.value)"></div>
+    </div>
+  `;
+
+  if (k === 'phos') {
+    const sys = getBufSys();
+    title.textContent = `Flacon ${sys.shortName}`;
+    const opts = Object.values(BUFFER_SYSTEMS).map(b => `<option value="${b.id}" ${b.id === sys.id ? 'selected' : ''}>${b.shortName} (pKa ${b.pka})</option>`).join('');
+
+    let hydHtml = '';
+    if (sys.comp1Forms && sys.comp2Forms) {
+      const f1 = sys.comp1Forms.map(f => `<option value="${f.id}" ${db.motherCalc.comp1FormId === f.id ? 'selected' : ''}>${f.name}</option>`).join('') + `<option value="custom" ${db.motherCalc.comp1FormId === 'custom' ? 'selected' : ''}>Personnalisé</option>`;
+      const f2 = sys.comp2Forms.map(f => `<option value="${f.id}" ${db.motherCalc.comp2FormId === f.id ? 'selected' : ''}>${f.name}</option>`).join('') + `<option value="custom" ${db.motherCalc.comp2FormId === 'custom' ? 'selected' : ''}>Personnalisé</option>`;
+      hydHtml = `
+        <div class="grid-2" style="margin-bottom:8px;">
+          <div class="field"><label>Forme acide</label><select class="txt" onchange="selectReagentForm(1, this.value)">${f1}</select></div>
+          <div class="field"><label>MW (g/mol)</label><input type="text" inputmode="decimal" value="${db.motherCalc.comp1Mw}" oninput="updateMotherInput('comp1Mw', this.value)"></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Forme base</label><select class="txt" onchange="selectReagentForm(2, this.value)">${f2}</select></div>
+          <div class="field"><label>MW (g/mol)</label><input type="text" inputmode="decimal" value="${db.motherCalc.comp2Mw}" oninput="updateMotherInput('comp2Mw', this.value)"></div>
+        </div>
+      `;
+    } else if (sys.comp1) {
+      hydHtml = `<div class="field"><label>MW ${sys.comp1.name} (g/mol)</label><input type="text" inputmode="decimal" value="${db.motherCalc.comp1Mw}" oninput="updateMotherInput('comp1Mw', this.value)"></div>`;
+    }
+
+    body.innerHTML = `
+      ${stockBar}
+      <div class="field" style="margin-bottom:10px;"><label>Système tampon</label><select class="txt" onchange="changeBufferSystem(this.value)">${opts}</select></div>
+      <div id="ph-scale-container"></div>
+      <div class="grid-3" style="margin-bottom:8px;">
+        <div class="field"><label>Volume (mL)</label><input type="text" inputmode="decimal" value="${db.motherCalc.vol_mL}" oninput="updateMotherInput('vol_mL', this.value)"></div>
+        <div class="field"><label>Conc. (M)</label><input type="text" inputmode="decimal" value="${db.motherCalc.conc_M}" oninput="updateMotherInput('conc_M', this.value)"></div>
+        <div class="field"><label>pH cible</label><input type="text" inputmode="decimal" value="${db.motherCalc.ph}" oninput="updateMotherInput('ph', this.value)"></div>
+      </div>
+      <div class="grid-2" style="margin-bottom:10px;">
+        <div class="field"><label>D₂O dans mère (%)</label><input type="text" inputmode="decimal" value="${db.motherCalc.d2o_pct || 0}" oninput="updateMotherInput('d2o_pct', this.value)"></div>
+        <div style="display:flex;align-items:center;justify-content:center;"><button class="toggle-link" onclick="toggleBlock('hyd-box', this)">Hydratation & MW ▾</button></div>
+      </div>
+      <div id="hyd-box" class="collapsible" style="margin-bottom:10px;">${hydHtml}</div>
+      <span class="eyebrow" style="margin-top:4px;">Pesées</span>
+      <div id="prep-result"></div>
+      <button class="btn-main" id="btn-add-mother" onclick="addPreparedMotherToStock()">+ Ajouter au stock</button>
+    `;
+  } else if (k === 'dss' || k === 'nan3') {
+    const isDss = k === 'dss';
+    title.textContent = isDss ? 'Flacon DSS' : 'Flacon NaN₃';
+    const vKey = isDss ? 'dss_vol' : 'nan3_vol';
+    const cKey = isDss ? 'dss_mM' : 'nan3_mM';
+    body.innerHTML = `
+      ${stockBar}
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div class="field"><label>Préparer (mL)</label><input type="text" inputmode="decimal" value="${db.motherCalc[vKey]}" oninput="updateMotherInput('${vKey}', this.value)"></div>
+        <div class="field"><label>Conc. (mM)</label><input type="text" inputmode="decimal" value="${db.motherCalc[cKey]}" oninput="updateMotherInput('${cKey}', this.value)"></div>
+      </div>
+      <span class="eyebrow">Pesée</span>
+      <div id="prep-result"></div>
+      <button class="btn-main" id="btn-add-mother" onclick="addPreparedMotherToStock()">+ Ajouter au stock</button>
+    `;
+  } else {
+    const isD2o = k === 'd2o';
+    title.textContent = isD2o ? 'Flacon D₂O 99.9%' : `Flacon Tampon ${db.params.factor}X`;
+    const perTube = isD2o ? 60 : (600 / db.params.factor);
+    const tubes = Math.floor(((s.vol || 0) * 1000) / perTube);
+    body.innerHTML = `
+      ${stockBar}
+      ${staticStep('Autonomie', `${perTube.toFixed(0)} µL / tube RMN`, `${tubes} tubes`, s.color)}
+    `;
+  }
+  calcMother();
+}
+
+function fmtMg(mg) { return mg >= 1000 ? `${(mg / 1000).toFixed(3)} g` : `${mg.toFixed(1)} mg`; }
+function fmtVol(mL) { return mL < 1 ? `${(mL * 1000).toFixed(1)} µL` : `${mL.toFixed(2)} mL`; }
+
+function calcMother() {
+  const k = db.selectedMother;
+  const res = document.getElementById('prep-result');
+  if (!res) return;
+
+  if (k === 'phos') {
+    const sys = getBufSys();
+    const V_mL = db.motherCalc.vol_mL;
+    const V_L = V_mL / 1000;
+    const C_M = db.motherCalc.conc_M;
+    const pH = db.motherCalc.ph;
+
+    const btn = document.getElementById('btn-add-mother');
+    if (btn) btn.textContent = `+ Ajouter ${V_mL} mL au stock ${sys.shortName}`;
+
+    const minS = 2, maxS = 12, span = maxS - minS;
+    const zL = Math.max(0, Math.min(100, ((sys.rangeMin - minS) / span) * 100));
+    const zW = Math.max(2, Math.min(100 - zL, ((sys.rangeMax - sys.rangeMin) / span) * 100));
+    const cur = Math.max(0, Math.min(100, ((pH - minS) / span) * 100));
+    const ok = pH >= sys.rangeMin && pH <= sys.rangeMax;
+
+    const sc = document.getElementById('ph-scale-container');
+    if (sc) {
+      sc.innerHTML = `
+        <div class="ph-gauge">
+          <div class="ph-gauge-top">
+            <span>pKa ${sys.pka} · ${sys.rangeMin}–${sys.rangeMax}</span>
+            <span style="color:${ok ? 'var(--accent)' : 'var(--nan3)'}">${ok ? '✓ Optimal' : '⚠ Hors plage'}</span>
+          </div>
+          <div class="ph-track">
+            <div class="ph-zone" style="left:${zL}%;width:${zW}%;"></div>
+            <div class="ph-cursor" style="left:${cur}%;"></div>
+          </div>
+          <div class="ph-scale-nums"><span>2</span><span>4</span><span>6</span><span>8</span><span>10</span><span>12</span></div>
+        </div>
+      `;
+    }
+
+    const ratio = Math.pow(10, pH - sys.pka);
+    const acid_M = C_M / (1 + ratio);
+    const base_M = C_M - acid_M;
+    const mw1 = db.motherCalc.comp1Mw || sys.comp1.mw;
+    const mw2 = db.motherCalc.comp2Mw || (sys.comp2 ? sys.comp2.mw : 100);
+    const f1 = sys.comp1Forms ? sys.comp1Forms.find(x => x.id === db.motherCalc.comp1FormId) : null;
+    const f2 = sys.comp2Forms ? sys.comp2Forms.find(x => x.id === db.motherCalc.comp2FormId) : null;
+    const n1 = f1 ? f1.name : sys.comp1.name;
+    const n2 = f2 ? f2.name : (sys.comp2 ? sys.comp2.name : '');
+
+    const mD2oPct = Math.max(0, Math.min(100, db.motherCalc.d2o_pct || 0));
+    const vMotherD2o = V_mL * (mD2oPct / 100);
+    const solvRow = mD2oPct > 0
+      ? staticStep(`Solvant D₂O (${mD2oPct}%)`, `Compléter q.s.p. ${V_mL} mL avec H₂O`, fmtVol(vMotherD2o), 'var(--d2o)')
+      : '';
+
+    if (sys.mode === 'two_solids') {
+      const m1 = acid_M * V_L * mw1 * 1000;
+      const m2 = base_M * V_L * mw2 * 1000;
+      res.innerHTML = `
+        ${staticStep(n1, `${(acid_M*1000).toFixed(0)} mM · MW ${mw1}`, fmtMg(m1), 'var(--phos)')}
+        ${staticStep(n2, `${(base_M*1000).toFixed(0)} mM · MW ${mw2}`, fmtMg(m2), 'var(--phos)')}
+        ${solvRow}
+      `;
+    } else if (sys.mode === 'acid_base_salt') {
+      const m1 = acid_M * V_L * mw1 * 1000;
+      const v1 = (m1 / 1000) / sys.comp1.density;
+      const m2 = base_M * V_L * mw2 * 1000;
+      res.innerHTML = `
+        ${staticStep(n1, `${(acid_M*1000).toFixed(0)} mM`, fmtVol(v1), 'var(--phos)')}
+        ${staticStep(n2, `${(base_M*1000).toFixed(0)} mM`, fmtMg(m2), 'var(--phos)')}
+      `;
+    } else {
+      const mTot = C_M * V_L * mw1 * 1000;
+      const vTit = (sys.mode === 'zwitterion_naoh' ? base_M : acid_M) * V_L * 1000;
+      res.innerHTML = `
+        ${staticStep(n1, `${C_M} M`, fmtMg(mTot), 'var(--phos)')}
+        ${staticStep(sys.titrant.name, 'Ajuster pH', `~${fmtVol(vTit)}`, 'var(--accent)')}
+      `;
+    }
+  } else if (k === 'dss' || k === 'nan3') {
+    const isDss = k === 'dss';
+    const V = isDss ? db.motherCalc.dss_vol : db.motherCalc.nan3_vol;
+    const C = isDss ? db.motherCalc.dss_mM : db.motherCalc.nan3_mM;
+    const mw = isDss ? 218.32 : 65.01;
+    const mg = (C / 1000) * (V / 1000) * mw * 1000;
+    const btn = document.getElementById('btn-add-mother');
+    if (btn) btn.textContent = `+ Ajouter ${V} mL au stock`;
+    res.innerHTML = staticStep(`${isDss ? 'DSS' : 'NaN₃'} poudre`, `q.s.p. ${V} mL H₂O`, fmtMg(mg), isDss ? 'var(--dss)' : 'var(--nan3)');
+  }
+}
+
+function openMath(tab) {
+  const title = document.getElementById('mathTitle');
+  const body = document.getElementById('mathBody');
+  if (tab === 'tube') {
+    const t = window._tube || { f: 5, vBuf: 120, vMust: 420, vD2o: 60, vD2oFromBuf: 0, bufD2oPct: 0, finalD2oPct: 10 };
+    title.textContent = 'Formules Tube RMN (600 µL)';
+    body.innerHTML = `<div class="calc-line">Tampon ${t.f}X : 600 ÷ ${t.f} = ${t.vBuf.toFixed(1)} µL<br>D₂O apporté par tampon (${t.bufD2oPct}%) : ${t.vD2oFromBuf.toFixed(1)} µL<br>D₂O pur à ajouter : ${t.vD2o.toFixed(1)} µL (total ${t.finalD2oPct.toFixed(1)}%)<br>Moût : 600 − ${t.vBuf.toFixed(1)} − ${t.vD2o.toFixed(1)} = ${t.vMust.toFixed(1)} µL</div>`;
+  } else if (tab === '5x') {
+    const b = window._5x || { f: 5, V_mL: 10, sPhos: 750, mother_mM: 1500, bufD2oPct: 0, vPhos: 5, vDss: 0.5, vNan3: 0.5, vD2o: 0, vH2o: 4 };
+    title.textContent = `Formules Tampon ${b.f}X`;
+    body.innerHTML = `<div class="calc-line">C₁V₁ = C₂V₂<br>Tampon : (${b.sPhos} ÷ ${b.mother_mM}) × ${b.V_mL} = ${b.vPhos.toFixed(2)} mL<br>DSS : ${b.vDss.toFixed(2)} mL · NaN₃ : ${b.vNan3.toFixed(2)} mL<br>D₂O (${b.bufD2oPct}%) : ${b.vD2o.toFixed(2)} mL<br>H₂O q.s.p. : ${Math.max(0, b.vH2o).toFixed(2)} mL</div>`;
+  } else {
+    title.textContent = 'Henderson-Hasselbalch';
+    body.innerHTML = `<div class="calc-line">pH = pKa + log₁₀([Base] / [Acide])<br>m (mg) = C (mol/L) × V (L) × MW (g/mol) × 1000</div>`;
+  }
+  document.getElementById('mathModal').classList.add('open');
+}
+
+// ---------- Glisser vers le bas pour fermer les modales ----------
+(function enableSheetDrag() {
+  document.querySelectorAll('.modal-bg').forEach(bg => {
+    const box = bg.querySelector('.modal-box');
+    let y0 = null, dy = 0;
+    box.addEventListener('touchstart', e => {
+      if (box.scrollTop > 0) { y0 = null; return; }
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'select' || tag === 'button') { y0 = null; return; }
+      y0 = e.touches[0].clientY; dy = 0;
+    }, { passive: true });
+    box.addEventListener('touchmove', e => {
+      if (y0 === null) return;
+      dy = Math.max(0, e.touches[0].clientY - y0);
+      if (dy > 0) { box.style.transition = 'none'; box.style.transform = `translateY(${dy}px)`; }
+    }, { passive: true });
+    box.addEventListener('touchend', () => {
+      if (y0 === null) return;
+      box.style.transition = ''; box.style.transform = '';
+      if (dy > 90) closeModal(bg.id);
+      y0 = null; dy = 0;
+    });
+  });
+})();
+
+// ==================== 5–6. ANALYSES RMN & CAHIER DE LABO ====================
+const NMR_EXPS = [
+  { id: 'noesy', name: '¹H NOESY-presat (noesygppr1d)' },
+  { id: 'cpmg',  name: '¹H CPMG (cpmgpr1d)' },
+  { id: 'zgpr',  name: '¹H zgpr (presat)' },
+  { id: 'jres',  name: 'J-res 2D (jresgpprqf)' },
+  { id: 'tocsy', name: '¹H-¹H TOCSY' },
+  { id: 'hsqc',  name: '¹H-¹³C HSQC' },
+  { id: 'c13',   name: '¹³C{¹H}' }
+];
+const TUBE_STATUS = [
+  { id: 'prep',  lbl: 'Préparé', c: '#6b6f78' },
+  { id: 'queue', lbl: 'Passeur', c: '#b86e00' },
+  { id: 'acq',   lbl: 'Acquis',  c: '#1c64d6' },
+  { id: 'proc',  lbl: 'Traité',  c: '#1f7a5a' }
+];
+const JTYPES = {
+  note:     { lbl: 'Note',         ic: '✎', c: '#17181b' },
+  obs:      { lbl: 'Observation',  ic: '◉', c: '#1c64d6' },
+  issue:    { lbl: 'Problème',     ic: '!', c: '#d03535' },
+  protocol: { lbl: 'Protocole',    ic: '§', c: '#6741d9' },
+  tube:     { lbl: 'Tube RMN',     ic: '▮', c: '#9b2148' },
+  status:   { lbl: 'Analyse',      ic: '↻', c: '#1c64d6' },
+  buffer:   { lbl: 'Tampon',       ic: '◒', c: '#6741d9' },
+  stock:    { lbl: 'Réactif',      ic: '+', c: '#0b7f95' },
+  sample:   { lbl: 'Échantillon',  ic: '◆', c: '#2b8a3e' },
+  aliquot:  { lbl: 'Aliquote',     ic: '÷', c: '#2b8a3e' },
+  edit:     { lbl: 'Modification', ic: '✎', c: '#8a8c93' },
+  delete:   { lbl: 'Suppression',  ic: '✕', c: '#8a8c93' }
+};
+const JGROUPS = [
+  ['ALL', 'Tout', null],
+  ['notes', 'Notes', ['note', 'obs', 'issue', 'protocol']],
+  ['tubes', 'Tubes & analyses', ['tube', 'status']],
+  ['prep', 'Préparations', ['buffer', 'stock']],
+  ['samples', 'Échantillons', ['sample', 'aliquot', 'edit', 'delete']]
+];
+const NOTE_SNIPPETS = [
+  'Décongelé sur glace, vortexé 10 s',
+  'Centrifugé 10 min · 10 000 g · 4 °C',
+  'Filtré 0,22 µm',
+  'pH ajusté à ',
+  'Précipité après ajout du tampon',
+  'Shimming difficile, raie DSS large',
+  'Lock D₂O instable'
+];
+const META_FIELDS = ['cultivar', 'plot', 'vintage', 'stage', 'matrix', 'rep'];
+
+function ensureDb() {
+  const d = defaultDb();
+  if (!Array.isArray(db.tubes)) db.tubes = [];
+  if (!Array.isArray(db.journal)) db.journal = [];
+  db.settings = { ...d.settings, ...(db.settings || {}) };
+  if (!db.params.nmrExp) db.params.nmrExp = 'noesy';
+}
+
+// ---------- Utilitaires ----------
+function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function uid(p) { return p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function pad(n) { return String(n).padStart(2, '0'); }
+function dayKey(ts) { const d = new Date(ts); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
+function fmtTime(ts) { const d = new Date(ts); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function fmtDay(ts) {
+  const k = dayKey(ts);
+  if (k === dayKey(Date.now())) return "Aujourd'hui";
+  if (k === dayKey(Date.now() - 864e5)) return 'Hier';
+  return new Date(ts).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+function fmtStamp(ts) { return new Date(ts).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }); }
+function fileStamp() { const d = new Date(); return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`; }
+
+function logEvent(type, text, sampleId, extra) {
+  db.journal.unshift({
+    id: uid('j_'), ts: Date.now(), type, text,
+    sampleId: sampleId || null,
+    operator: db.settings.operator || '',
+    manual: !!(extra && extra.manual),
+    ref: (extra && extra.ref) || null
+  });
+  if (db.journal.length > 5000) db.journal.length = 5000;
+}
+
+function metaLine(s) {
+  if (!s) return '';
+  return META_FIELDS.map(f => (s[f] == null ? '' : String(s[f]).trim())).filter(Boolean).join(' · ');
+}
+function pickMeta(s) { const o = {}; META_FIELDS.forEach(f => { o[f] = (s && s[f]) || ''; }); return o; }
+function readMeta(prefix) {
+  const o = {};
+  META_FIELDS.forEach(f => { const el = document.getElementById(`${prefix}-${f}`); o[f] = el ? el.value.trim() : ''; });
+  return o;
+}
+function fillMeta(prefix, s) { META_FIELDS.forEach(f => { const el = document.getElementById(`${prefix}-${f}`); if (el) el.value = (s && s[f]) || ''; }); }
+function sampleHaystack(s) { return [s.name, s.experiment, s.location, s.treatment, ...META_FIELDS.map(f => s[f])].join(' ').toLowerCase(); }
+function expName(id) { const e = NMR_EXPS.find(x => x.id === id); return e ? e.name : (id || '—'); }
+function statusOf(id) { return TUBE_STATUS.find(s => s.id === id) || TUBE_STATUS[0]; }
+
+// ---------- Toast + annulation ----------
+let _toastTimer = null;
+function toast(msg, undoFn) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  document.getElementById('toast-msg').textContent = msg;
+  const u = document.getElementById('toast-undo');
+  u.style.display = undoFn ? '' : 'none';
+  u.onclick = () => { el.classList.remove('show'); if (undoFn) undoFn(); };
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), undoFn ? 6500 : 2400);
+}
+function restoreSnapshot(snap, label) {
+  try {
+    db = JSON.parse(snap);
+    ensureDb(); save(); refreshAll(); haptic(20);
+    toast(label || 'Action annulée');
+  } catch (e) {}
+}
+function syncInputsFromDb() {
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+  const f = db.params.factor;
+  set('finPhos', db.params.finPhos); set('finDss', db.params.finDss); set('finNan3', db.params.finNan3);
+  set('bufFactor', f); set('tubeD2oPctIn', db.params.tubeD2oPct != null ? db.params.tubeD2oPct : 10);
+  set('bufD2oPctIn', db.params.bufD2oPct || 0);
+  set('stockPhosIn', +(db.params.finPhos * f).toFixed(2));
+  set('stockDssIn', +(db.params.finDss * f).toFixed(2));
+  set('stockNan3In', +(db.params.finNan3 * f).toFixed(2));
+}
+function refreshAll() {
+  syncInputsFromDb(); initExtras(); updateLabels();
+  renderSampleSelector(); calcTube(); calc5X();
+  renderSamplesPage(); renderMothers(); renderAnalyses(); renderJournal();
+}
+
+// ---------- Registre des tubes RMN ----------
+function nextTubeCode() {
+  const d = new Date();
+  const k = `${String(d.getFullYear()).slice(2)}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+  const n = db.tubes.filter(t => t.code && t.code.indexOf(`RMN-${k}-`) === 0).length + 1;
+  return `RMN-${k}-${pad(n)}`;
+}
+function createTubeRecord(active, f) {
+  const t = window._tube || {};
+  const expEl = document.getElementById('tube-nmr-exp');
+  const phEl = document.getElementById('tube-ph');
+  const noteEl = document.getElementById('tube-note');
+  const expId = (expEl && expEl.value) || db.params.nmrExp || 'noesy';
+  const phRaw = phEl ? phEl.value.trim() : '';
+  const note = noteEl ? noteEl.value.trim() : '';
+  const rec = {
+    id: uid('t_'), code: nextTubeCode(), ts: Date.now(),
+    sampleId: active ? active.id : null, sampleName: active ? active.name : '—',
+    meta: active ? pickMeta(active) : {},
+    factor: f, buffer: (t.sys || getBufSys()).shortName,
+    finPhos: db.params.finPhos, finDss: db.params.finDss, finNan3: db.params.finNan3,
+    vMust: +(t.vMust || 0).toFixed(1), vBuf: +(t.vBuf || 0).toFixed(1), vD2o: +(t.vD2o || 0).toFixed(1),
+    d2oPct: +(t.finalD2oPct || 0).toFixed(1),
+    exp: expId, ph: phRaw ? num(phRaw, null) : null, note, position: '', status: 'prep',
+    operator: db.settings.operator || '', spectro: db.settings.spectro || '', tempK: db.settings.tempK || ''
+  };
+  db.tubes.unshift(rec);
+  logEvent('tube',
+    `${rec.code} préparé — ${rec.sampleName} · ${expName(expId)}\n${rec.vMust} µL échantillon + ${rec.vBuf} µL tampon ${rec.buffer} ${f}X + ${rec.vD2o} µL D₂O → ${rec.d2oPct}% D₂O, ${rec.finPhos} mM${rec.ph != null ? ` · pH ${rec.ph}` : ''}${note ? `\n${note}` : ''}`,
+    rec.sampleId, { ref: rec.id });
+  if (phEl) phEl.value = '';
+  if (noteEl) noteEl.value = '';
+  return rec;
+}
+
+function renderAnalyses() {
+  const box = document.getElementById('tubes-list');
+  if (!box) return;
+  const f = window._tubeFilter || 'ALL';
+  document.getElementById('tube-total').textContent = db.tubes.length;
+  document.getElementById('tube-kpis').innerHTML = TUBE_STATUS.map(s => {
+    const n = db.tubes.filter(t => t.status === s.id).length;
+    return `<button class="kpi ${f === s.id ? 'active' : ''}" style="--sc:${s.c}" onclick="haptic();window._tubeFilter=(window._tubeFilter==='${s.id}'?'ALL':'${s.id}');renderAnalyses()"><b>${n}</b><span>${s.lbl}</span></button>`;
+  }).join('');
+  const q = (window._tubeQuery || '').toLowerCase().trim();
+  const list = db.tubes.filter(t => (f === 'ALL' || t.status === f) &&
+    (!q || `${t.code} ${t.sampleName} ${expName(t.exp)} ${t.note || ''} ${metaLine(t.meta)}`.toLowerCase().includes(q)));
+  if (!list.length) {
+    box.innerHTML = `<div class="empty-state">${db.tubes.length ? 'Aucun tube pour ce filtre.' : 'Aucun tube enregistré.<br>Validez un tube depuis l’onglet <strong>Tube</strong>.'}</div>`;
+    return;
+  }
+  box.innerHTML = list.slice(0, 300).map(t => {
+    const st = statusOf(t.status);
+    const idx = TUBE_STATUS.indexOf(st);
+    const nxt = TUBE_STATUS[(idx + 1) % TUBE_STATUS.length];
+    const meta = metaLine(t.meta);
+    return `
+      <div class="rec" style="--sc:${st.c}" onclick="openTubeModal('${t.id}')">
+        <div class="rec-head">
+          <div style="min-width:0;">
+            <div class="rec-code">${esc(t.code)}${t.position ? `<span class="rec-pos">#${esc(t.position)}</span>` : ''}</div>
+            <div class="rec-title">${esc(t.sampleName)}</div>
+          </div>
+          <button class="status-pill" onclick="event.stopPropagation();advanceTube('${t.id}')">${st.lbl}<span>→ ${nxt.lbl}</span></button>
+        </div>
+        <div class="rec-meta">${esc(expName(t.exp))} · ${fmtStamp(t.ts)}${t.ph != null ? ` · pH ${t.ph}` : ''} · ${t.d2oPct}% D₂O</div>
+        ${meta ? `<div class="rec-vine">${esc(meta)}</div>` : ''}
+        ${t.note ? `<div class="rec-note">${esc(t.note)}</div>` : ''}
+        <div class="status-track">${TUBE_STATUS.map((s, i) => `<i class="${i <= idx ? 'on' : ''}"></i>`).join('')}</div>
+      </div>`;
+  }).join('');
+}
+
+function advanceTube(id) {
+  const t = db.tubes.find(x => x.id === id);
+  if (!t) return;
+  const prev = t.status;
+  const i = TUBE_STATUS.findIndex(s => s.id === t.status);
+  t.status = TUBE_STATUS[(i + 1) % TUBE_STATUS.length].id;
+  logEvent('status', `${t.code} : ${statusOf(prev).lbl} → ${statusOf(t.status).lbl}`, t.sampleId, { ref: t.id });
+  haptic(12); save(); renderAnalyses();
+}
+
+function openTubeModal(id) {
+  const t = db.tubes.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById('tm-id').value = t.id;
+  document.getElementById('tm-title').textContent = t.code;
+  document.getElementById('tm-status').value = t.status;
+  document.getElementById('tm-exp').value = t.exp;
+  document.getElementById('tm-ph').value = t.ph != null ? t.ph : '';
+  document.getElementById('tm-pos').value = t.position || '';
+  document.getElementById('tm-note').value = t.note || '';
+  document.getElementById('tm-info').innerHTML =
+    `${esc(t.sampleName)}${metaLine(t.meta) ? `<br>${esc(metaLine(t.meta))}` : ''}<br>` +
+    `${t.vMust} µL éch. + ${t.vBuf} µL ${esc(t.buffer)} ${t.factor}X + ${t.vD2o} µL D₂O<br>` +
+    `${t.finPhos} mM · DSS ${t.finDss} mM · NaN₃ ${t.finNan3} mM · ${t.d2oPct}% D₂O<br>` +
+    `${fmtStamp(t.ts)}${t.operator ? ` · ${esc(t.operator)}` : ''}${t.spectro ? ` · ${esc(t.spectro)}` : ''}${t.tempK ? ` · ${esc(t.tempK)} K` : ''}`;
+  document.getElementById('tubeModal').classList.add('open');
+}
+
+function saveTubeEdit() {
+  const t = db.tubes.find(x => x.id === document.getElementById('tm-id').value);
+  if (!t) return;
+  const prev = t.status;
+  t.status = document.getElementById('tm-status').value;
+  t.exp = document.getElementById('tm-exp').value;
+  const ph = document.getElementById('tm-ph').value.trim();
+  t.ph = ph ? num(ph, null) : null;
+  t.position = document.getElementById('tm-pos').value.trim();
+  t.note = document.getElementById('tm-note').value.trim();
+  logEvent('status', `${t.code} mis à jour${prev !== t.status ? ` : ${statusOf(prev).lbl} → ${statusOf(t.status).lbl}` : ''}${t.position ? ` · position ${t.position}` : ''}${t.note ? ` · ${t.note}` : ''}`, t.sampleId, { ref: t.id });
+  save(); closeModal('tubeModal'); renderAnalyses(); haptic(12);
+}
+
+function deleteTube() {
+  const id = document.getElementById('tm-id').value;
+  const t = db.tubes.find(x => x.id === id);
+  if (!t) return;
+  const snap = JSON.stringify(db);
+  db.tubes = db.tubes.filter(x => x.id !== id);
+  logEvent('delete', `Enregistrement ${t.code} supprimé (volumes non restaurés)`, t.sampleId);
+  save(); closeModal('tubeModal'); renderAnalyses();
+  toast(`${t.code} supprimé`, () => restoreSnapshot(snap, 'Enregistrement restauré'));
+}
+
+// ---------- Cahier de laboratoire ----------
+function setNoteType(t, btn) {
+  window._noteType = t;
+  document.querySelectorAll('#note-types button').forEach(b => b.classList.toggle('active', b === btn));
+  haptic(6);
+}
+function insertSnippet(i) {
+  const ta = document.getElementById('note-text');
+  const s = NOTE_SNIPPETS[i];
+  ta.value = ta.value ? ta.value.replace(/\s*$/, '') + '\n' + s : s;
+  ta.focus();
+  ta.setSelectionRange(ta.value.length, ta.value.length);
+}
+function addNote() {
+  const ta = document.getElementById('note-text');
+  const txt = ta.value.trim();
+  if (!txt) { ta.focus(); return; }
+  const a = getActiveSample();
+  const link = document.getElementById('note-link').checked;
+  logEvent(window._noteType || 'note', txt, link && a ? a.id : null, { manual: true });
+  ta.value = '';
+  save(); haptic(14); renderJournal();
+  toast('Ajouté au cahier');
+}
+function deleteEntry(id) {
+  const snap = JSON.stringify(db);
+  db.journal = db.journal.filter(e => e.id !== id);
+  save(); renderJournal();
+  toast('Entrée supprimée', () => restoreSnapshot(snap, 'Entrée restaurée'));
+}
+
+function renderJournal() {
+  const box = document.getElementById('journal-list');
+  if (!box) return;
+  const a = getActiveSample();
+  const lbl = document.getElementById('note-link-lbl');
+  if (lbl) lbl.textContent = a ? `Lier à : ${a.name}` : 'Aucun échantillon actif';
+
+  const today = dayKey(Date.now());
+  const tToday = db.journal.filter(e => dayKey(e.ts) === today);
+  document.getElementById('journal-today').textContent =
+    `Auj. : ${tToday.filter(e => e.type === 'tube').length} tube · ${tToday.filter(e => e.manual).length} note`;
+
+  const f = window._jFilter || 'ALL';
+  document.getElementById('journal-filters').innerHTML = JGROUPS.map(([k, l]) =>
+    `<button class="exp-chip ${f === k ? 'active' : ''}" onclick="window._jFilter='${k}';renderJournal()">${l}</button>`).join('');
+
+  const types = (JGROUPS.find(g => g[0] === f) || JGROUPS[0])[2];
+  const q = (window._jQuery || '').toLowerCase().trim();
+  const list = db.journal.filter(e => (!types || types.includes(e.type)) && (!q || `${e.text} ${e.operator}`.toLowerCase().includes(q)));
+  if (!list.length) {
+    box.innerHTML = `<div class="more-note" style="padding:22px 0;">${db.journal.length ? 'Aucune entrée pour ce filtre.' : 'Le cahier est vide. Les préparations, tubes et aliquotes s’y inscrivent automatiquement.'}</div>`;
+    return;
+  }
+  let html = '', lastDay = null;
+  const shown = list.slice(0, 250);
+  shown.forEach(e => {
+    const dk = dayKey(e.ts);
+    if (dk !== lastDay) { html += `<div class="day-label">${fmtDay(e.ts)}</div>`; lastDay = dk; }
+    const jt = JTYPES[e.type] || JTYPES.note;
+    const smp = e.manual && e.sampleId ? db.samples.find(s => s.id === e.sampleId) : null;
+    html += `
+      <div class="entry ${e.manual ? 'manual' : ''}" style="--ec:${jt.c}">
+        <div class="entry-ic">${jt.ic}</div>
+        <div class="entry-body">
+          <div class="entry-top"><span class="entry-type">${jt.lbl}</span><span class="entry-time">${fmtTime(e.ts)}${e.operator ? ` · ${esc(e.operator)}` : ''}</span></div>
+          <div class="entry-text">${esc(e.text)}</div>
+          ${smp ? `<div class="entry-smp">↳ ${esc(smp.name)}</div>` : ''}
+        </div>
+        ${e.manual ? `<button class="entry-del" aria-label="Supprimer" onclick="deleteEntry('${e.id}')">✕</button>` : ''}
+      </div>`;
+  });
+  if (list.length > shown.length) html += `<div class="more-note">${list.length - shown.length} entrées plus anciennes — affinez la recherche ou exportez le cahier.</div>`;
+  box.innerHTML = html;
+}
+
+function renderSampleHistory(id) {
+  const el = document.getElementById('edit-smp-history');
+  if (!el) return;
+  const tubes = db.tubes.filter(t => t.sampleId === id);
+  const entries = db.journal.filter(e => e.sampleId === id).slice(0, 15);
+  el.innerHTML = `<span class="eyebrow">Traçabilité</span>` +
+    (tubes.length
+      ? tubes.map(t => `<div class="hist-line"><span class="mono">${esc(t.code)}</span><span>${esc(expName(t.exp).split(' (')[0])}</span><span class="hist-st" style="color:${statusOf(t.status).c}">${statusOf(t.status).lbl}</span></div>`).join('')
+      : `<div class="hist-empty">Aucun tube RMN pour cet échantillon.</div>`) +
+    (entries.length ? `<div class="hist-j">${entries.map(e => `<div><b>${fmtStamp(e.ts)}</b>${esc(e.text.split('\n')[0])}</div>`).join('')}</div>` : '');
+}
+
+// ---------- Paramètres & exports ----------
+function updateSetting(k, v) {
+  db.settings[k] = k === 'tempK' ? num(v, '') : v;
+  save();
+  if (k === 'project') updateBrand();
+}
+function updateBrand() {
+  const el = document.getElementById('brand-sub');
+  if (el) el.textContent = (db.settings.project || 'Paillasse').toUpperCase();
+}
+function renderBackupInfo() {
+  const el = document.getElementById('backup-info');
+  if (!el) return;
+  const last = db.settings.lastExport;
+  const old = !last || (Date.now() - last) > 7 * 864e5;
+  el.className = 'backup-info' + (old ? ' warn' : '');
+  el.textContent = last ? `Dernière sauvegarde : ${fmtStamp(last)}${old ? ' — à renouveler' : ''}` : '⚠ Aucune sauvegarde exportée. Les données ne vivent que dans ce navigateur.';
+}
+function downloadFile(name, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+}
+function toCsv(rows) {
+  return '﻿' + rows.map(r => r.map(v => {
+    const s = v == null ? '' : String(v);
+    return /[;"\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  }).join(';')).join('\r\n');
+}
+function exportJson() {
+  db.settings.lastExport = Date.now();
+  save();
+  downloadFile(`rmn-bench-sauvegarde-${fileStamp()}.json`, JSON.stringify(db, null, 1), 'application/json');
+  renderBackupInfo(); toast('Sauvegarde exportée');
+}
+function exportSamplesCsv() {
+  const rows = [['id', 'parent', 'nom', 'experience', 'cepage', 'parcelle', 'millesime', 'stade', 'matrice', 'replicat', 'stockage', 'traitement', 'volume_mL', 'initial_mL', 'tubes_RMN']];
+  db.samples.forEach(s => {
+    const parent = s.parentId ? (db.samples.find(p => p.id === s.parentId) || {}).name || s.parentId : '';
+    rows.push([s.id, parent, s.name, s.experiment, s.cultivar, s.plot, s.vintage, s.stage, s.matrix, s.rep, s.location, s.treatment, s.vol_mL, s.init_mL, s.tubesMade || 0]);
+  });
+  downloadFile(`rmn-echantillons-${fileStamp()}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
+  toast('CSV échantillons exporté');
+}
+function exportTubesCsv() {
+  const rows = [['code', 'date', 'heure', 'echantillon', 'cepage', 'parcelle', 'millesime', 'stade', 'matrice', 'replicat', 'experience', 'statut', 'position', 'pH', 'facteur', 'tampon', 'tampon_mM', 'DSS_mM', 'NaN3_mM', 'V_echantillon_uL', 'V_tampon_uL', 'V_D2O_uL', 'D2O_pct', 'operateur', 'spectrometre', 'T_K', 'remarque']];
+  [...db.tubes].reverse().forEach(t => {
+    const m = t.meta || {};
+    rows.push([t.code, dayKey(t.ts), fmtTime(t.ts), t.sampleName, m.cultivar, m.plot, m.vintage, m.stage, m.matrix, m.rep, expName(t.exp), statusOf(t.status).lbl, t.position, t.ph, t.factor, t.buffer, t.finPhos, t.finDss, t.finNan3, t.vMust, t.vBuf, t.vD2o, t.d2oPct, t.operator, t.spectro, t.tempK, t.note]);
+  });
+  downloadFile(`rmn-tubes-${fileStamp()}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
+  toast('Feuille des tubes exportée');
+}
+function exportJournalMd() {
+  const s = db.settings;
+  let md = `# Cahier de laboratoire — ${s.project || 'RMN Bench'}\n\n`;
+  md += `- Exporté le ${new Date().toLocaleString('fr-FR')}\n- Opérateur·rice : ${s.operator || '—'}\n- Spectromètre : ${s.spectro || '—'} · ${s.tempK || '—'} K\n- ${db.samples.length} échantillons · ${db.tubes.length} tubes RMN · ${db.journal.length} entrées\n`;
+  let last = null;
+  [...db.journal].reverse().forEach(e => {
+    const dk = dayKey(e.ts);
+    if (dk !== last) { md += `\n## ${new Date(e.ts).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}\n\n`; last = dk; }
+    const jt = JTYPES[e.type] || JTYPES.note;
+    const smp = e.manual && e.sampleId ? (db.samples.find(x => x.id === e.sampleId) || {}).name : '';
+    md += `- **${fmtTime(e.ts)}** · *${jt.lbl}*${e.operator ? ` (${e.operator})` : ''} — ${e.text.replace(/\n/g, '\n  ')}${smp ? ` _[${smp}]_` : ''}\n`;
+  });
+  downloadFile(`cahier-labo-${fileStamp()}.md`, md, 'text/markdown;charset=utf-8');
+  toast('Cahier exporté');
+}
+function importJson(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const p = JSON.parse(r.result);
+      if (!p || !Array.isArray(p.samples) || !p.stocks) throw new Error('format');
+      if (!confirm(`Remplacer les données actuelles par « ${file.name} » ?\n${p.samples.length} échantillons · ${(p.tubes || []).length} tubes · ${(p.journal || []).length} entrées`)) { input.value = ''; return; }
+      const snap = JSON.stringify(db);
+      const d = defaultDb();
+      const stocks = {};
+      for (const k of Object.keys(d.stocks)) stocks[k] = { ...d.stocks[k], ...((p.stocks || {})[k] || {}), color: d.stocks[k].color };
+      db = { ...d, ...p, stocks, collapsedParents: p.collapsedParents || {}, params: { ...d.params, ...(p.params || {}) }, motherCalc: { ...d.motherCalc, ...(p.motherCalc || {}) } };
+      db.samples = p.samples.map(s => ({ experiment: '', ...s }));
+      ensureDb();
+      logEvent('edit', `Données restaurées depuis ${file.name}`);
+      save(); refreshAll();
+      toast('Sauvegarde restaurée', () => restoreSnapshot(snap, 'Restauration annulée'));
+    } catch (e) { toast('Fichier de sauvegarde invalide'); }
+    input.value = '';
+  };
+  r.readAsText(file);
+}
+
+function initExtras() {
+  const opts = sel => NMR_EXPS.map(e => `<option value="${e.id}" ${sel === e.id ? 'selected' : ''}>${e.name}</option>`).join('');
+  const te = document.getElementById('tube-nmr-exp');
+  if (te) te.innerHTML = opts(db.params.nmrExp);
+  const tme = document.getElementById('tm-exp');
+  if (tme) tme.innerHTML = opts('');
+  const tms = document.getElementById('tm-status');
+  if (tms) tms.innerHTML = TUBE_STATUS.map(s => `<option value="${s.id}">${s.lbl}</option>`).join('');
+  const sn = document.getElementById('note-snips');
+  if (sn) sn.innerHTML = NOTE_SNIPPETS.map((s, i) => `<button onclick="insertSnippet(${i})">${esc(s)}</button>`).join('');
+  [['set-operator', 'operator'], ['set-project', 'project'], ['set-spectro', 'spectro'], ['set-temp', 'tempK']].forEach(([id, k]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = db.settings[k] == null ? '' : db.settings[k];
+  });
+  updateBrand(); renderBackupInfo();
+}
+
+// Init
+document.getElementById('finPhos').value = db.params.finPhos;
+document.getElementById('finDss').value = db.params.finDss;
+document.getElementById('finNan3').value = db.params.finNan3;
+document.getElementById('bufFactor').value = db.params.factor;
+document.getElementById('tubeD2oPctIn').value = db.params.tubeD2oPct != null ? db.params.tubeD2oPct : 10;
+document.getElementById('bufD2oPctIn').value = db.params.bufD2oPct || 0;
+updateLabels();
+renderSampleSelector();
+calcTube();
+initExtras();
+// ---------- Application installée : hors ligne + stockage persistant ----------
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persisted().then(p => { if (!p) navigator.storage.persist(); }).catch(() => {});
+}
+</script>
+</body>
+</html>
